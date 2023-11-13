@@ -15,6 +15,7 @@ def convert_to_mp3(file: bytes) -> bytes:
     """
     The ffmpeg command arguments used:
 
+        -y overwrites the output file if it already exists.
         -i specifies the input file, in this case source.name.
         -vn disables video recording, meaning only the audio will be processed.
         -ar sets the audio sampling rate to 44100 Hz.
@@ -32,6 +33,8 @@ def convert_to_mp3(file: bytes) -> bytes:
         command = [
             'ffmpeg', '-y',
             '-i', source.name,
+            '-vn',
+            '-ar', '44100',
             '-ab', '16k',
             '-f', 'mp3',
             result.name,
