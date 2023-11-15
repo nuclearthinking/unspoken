@@ -16,12 +16,13 @@ gunicorn = "^21.2.0"
 python-multipart = "^0.0.6"
 python-magic = "^0.4.27"
 pydub = "^0.25.1"
-
+uvicorn = "^0.24.0.post1"
+nvidia-cublas-cu11 = "^11.11.3.6"
+nvidia-cudnn-cu11 = "^8.9.6.50"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.5"
 isort = "^5.12.0"
-uvicorn = "^0.24.0.post1"
 
 [build-system]
 requires = ["poetry-core"]
