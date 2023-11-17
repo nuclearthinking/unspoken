@@ -25,7 +25,7 @@ services:
         condition: service_healthy
   worker:
     build: .
-    command: celery -A unspoken.services.queue.broker.celery worker --loglevel=INFO
+    command: celery -A unspoken.services.queue.tasks.celery worker --loglevel=INFO
     environment:
       db_user: "unspoken"
       db_password: "changeme"
@@ -43,7 +43,7 @@ services:
     volumes:
       - type: bind
         source: ./models
-        target: /app/unspoken/models
+        target: /app/models
     depends_on:
       - amqp
       - api

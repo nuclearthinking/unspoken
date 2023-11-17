@@ -1,12 +1,10 @@
 import logging
-import random
-import time
 
 from celery import Celery
 
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services import db
-from unspoken.services.audio.converter import convert_to_mp3
+from unspoken.services.audio.converter import convert_to_mp3, convert_to_wav
 from unspoken.services.ml.transcriber import TranscriberFactory
 from unspoken.settings import settings
 
@@ -38,7 +36,7 @@ def transcribe_audio(task_id: int):
         db.update_task(task, status=TaskStatus.failed)
         return
     db.update_task(task, status=TaskStatus.transcribing)
-    transcript = TranscriberFactory.get_transcriber().transcribe(task.audio.data)
+    transcript = TranscriberFactory.get_transcriber().transcribe(task.audio.mp3_data)
     logger.info('Finished transcribing audio for task_id: %s, transcript %s', task_id, transcript)
     logger.info('Finished transcribing audio for task_id: %s', task_id)
 
@@ -56,11 +54,13 @@ def convert_audio(temp_file_id: int) -> None:
         db.remove_temp_file(temp_file_id)
         return
     db.update_task(task, status=TaskStatus.audio_converting)
-    converted_audio = convert_to_mp3(file.data)
+    mp3_audio = convert_to_mp3(file.data)
+    wav_audio = convert_to_wav(file.data)
     audio = db.create_audio(
         db.Audio(
             file_name=file.file_name,
-            data=converted_audio,
+            mp3_data=mp3_audio,
+            wav_data=wav_audio,
         )
     )
     db.update_task(task, audio_id=audio.id)

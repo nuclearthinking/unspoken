@@ -1,5 +1,5 @@
 from faster_whisper import WhisperModel
-
+from io import BytesIO
 from unspoken.settings import settings
 
 
@@ -13,7 +13,7 @@ class Transcriber:
         )
 
     def transcribe(self, audio: bytes) -> str:
-        segments, info = self._model.transcribe(audio, language='ru')
+        segments, info = self._model.transcribe(BytesIO(audio), language='ru')
         result = []
         for segment in segments:
             result.append(segment)

@@ -1,5 +1,5 @@
 models
-.venv
 unspoken.db
+.venv
 .idea
 .ruff_cache
