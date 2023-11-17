@@ -2,3 +2,4 @@ models
 .venv
 unspoken.db
 .idea
+.ruff_cache

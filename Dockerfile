@@ -3,9 +3,9 @@ LABEL authors="nuclearthinking"
 
 RUN apt update && \
     apt -y upgrade && \
-    apt install -y ffmpeg libavcodec-extra gcc python3-dev libffi-dev python3-pip
+    apt install -y ffmpeg libavcodec-extra gcc python3-dev libffi-dev python3-pip libmagic-dev libblas3 liblapack3 liblapack-dev libblas-dev
 
-RUN pip install -U pip && pip install poetry
+RUN pip install -U pip && pip install poetry && pip install -U Cython && pip install youtokentome==1.0.6
 
 WORKDIR /app
 
@@ -17,6 +17,3 @@ RUN poetry config virtualenvs.create false && \
 
 COPY . /app/
 
-CMD ["gunicorn", "unspoken.app:app", "-w 4", "-k uvicorn.workers.UvicornWorker"]
-
-#ENTRYPOINT ["top", "-b"]

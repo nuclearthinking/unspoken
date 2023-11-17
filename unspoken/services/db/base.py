@@ -2,18 +2,30 @@ import datetime
 import logging
 
 import sqlalchemy as sa
-from sqlalchemy.dialects.sqlite import BLOB
 from sqlalchemy.orm import (
     Mapped,
     DeclarativeBase,
     sessionmaker,
     mapped_column,
-    scoped_session
+    scoped_session,
+    relationship,
 )
+
+from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
-engine = sa.create_engine("sqlite:///unspoken.db")
+engine = sa.create_engine(
+    'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}'.format(
+        user=settings.db_user,
+        password=settings.db_password,
+        host=settings.db_host,
+        port=settings.db_port,
+        db_name=settings.db_name,
+    ),
+    echo=False,
+)
 session = scoped_session(sessionmaker(autocommit=False, bind=engine))
 
 
@@ -26,10 +38,84 @@ def setup() -> None:
 
 
 class Audio(Base):
-    __tablename__ = "audio"
+    __tablename__ = 'audio'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     file_name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
-    data: Mapped[bytes] = mapped_column(BLOB, nullable=False)
+    mp3_data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
+    wav_data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+
+class Transcript(Base):
+    __tablename__ = 'transcript'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    audio_id: Mapped[int] = mapped_column(sa.ForeignKey(Audio.id), nullable=False)
+    text: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+
+class Task(Base):
+    __tablename__ = 'task'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    status: Mapped[TaskStatus] = mapped_column(sa.Enum(TaskStatus), nullable=False, default=TaskStatus.queued)
+    audio_id: Mapped[int] = mapped_column(sa.ForeignKey(Audio.id), nullable=True)
+    audio: Mapped[Audio] = relationship(Audio, foreign_keys=[audio_id], lazy='joined')
+    transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=True)
+    transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
+
+
+class TempFile(Base):
+    __tablename__ = 'temp_file'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[int] = mapped_column(sa.ForeignKey(Task.id), nullable=False)
+    file_name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
+
+
+def create_new_task() -> Task:
+    task = Task()
+    session.add(task)
+    session.commit()
+    return task
+
+
+def save_temp_file(file: TempFile) -> TempFile:
+    session.add(file)
+    session.commit()
+    return file
+
+
+def get_temp_file(id_: int) -> TempFile | None:
+    query = sa.select(TempFile).where(TempFile.id == id_)
+    return session.execute(query).scalar_one_or_none()
+
+
+def remove_temp_file(id_: int) -> None:
+    query = sa.delete(TempFile).where(TempFile.id == id_)
+    session.execute(query)
+    session.commit()
+    logger.info(f'Removed temp file with id {id_}')
+
+
+def create_audio(audio: Audio) -> Audio:
+    session.add(audio)
+    session.commit()
+    return audio
+
+
+def get_task(id_: int) -> Task | None:
+    query = sa.select(Task).where(Task.id == id_)
+    return session.execute(query).scalar_one_or_none()
+
+
+def update_task(task: Task, **kwargs) -> Task:
+    for key, value in kwargs.items():
+        setattr(task, key, value)
+    session.commit()
+    return task

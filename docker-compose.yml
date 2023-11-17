@@ -1,0 +1,75 @@
+version: '3.7'
+
+volumes:
+  db:
+
+networks:
+  rabbitmq:
+  db:
+
+services:
+  api:
+    build: .
+    command: gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
+    ports:
+      - "8000:8000"
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+    depends_on:
+      db:
+        condition: service_healthy
+  worker:
+    build: .
+    command: celery -A unspoken.services.queue.broker.celery worker --loglevel=INFO
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - type: bind
+        source: ./models
+        target: /app/unspoken/models
+    depends_on:
+      - amqp
+      - api
+  db:
+    image: postgres:16.1-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "unspoken"
+      POSTGRES_USER: "unspoken"
+      POSTGRES_PASSWORD: "changeme"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unspoken -d unspoken" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - db:/var/lib/postgresql/data
+  amqp:
+    image: rabbitmq:3.9.29-management
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=unspoken
+      - RABBITMQ_DEFAULT_PASS=unspoken
+    ports:
+      - "5672:5672"
+      - "15672:15672"

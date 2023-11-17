@@ -3,12 +3,7 @@ from faster_whisper import WhisperModel
 from unspoken.settings import settings
 
 
-class TranscriberFactory:
-    ...
-
-
 class Transcriber:
-
     def __init__(self):
         self._model = WhisperModel(
             model_size_or_path='large-v2',
@@ -21,13 +16,16 @@ class Transcriber:
         segments, info = self._model.transcribe(audio, language='ru')
         result = []
         for segment in segments:
-            print(segment)
             result.append(segment)
+            print(segment)
         return result
 
 
+class TranscriberFactory:
+    __transcriber = None
 
-
-
-transcriber = Transcriber()
-transcriber.transcribe(open('sample.mp3', 'rb'))
+    @staticmethod
+    def get_transcriber() -> Transcriber:
+        if TranscriberFactory.__transcriber is None:
+            TranscriberFactory.__transcriber = Transcriber()
+        return TranscriberFactory.__transcriber

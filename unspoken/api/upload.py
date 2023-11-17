@@ -1,21 +1,29 @@
+import logging
+
 import magic
 from fastapi import APIRouter, UploadFile, HTTPException
 
+from unspoken.enitites.api.upload import UploadResponse
 from unspoken.enitites.enums.mime_types import MimeType
-from unspoken.exceptions import EncodingError
-from unspoken.services.audio.converter import convert_to_mp3
+from unspoken.services import db
+from unspoken.services.queue.broker import convert_audio
 
 upload_router = APIRouter(prefix='/upload')
 
+logger = logging.getLogger(__name__)
 
-@upload_router.post('/audio')
+
+@upload_router.post('/audio', response_model=UploadResponse)
 async def upload_audio(file: UploadFile):
     file_data = await file.read()
     file_type = magic.from_buffer(file_data[:2048], mime=True)
     if not MimeType(file_type).is_audio():
         raise HTTPException(status_code=400, detail='File is not audio.')
-    try:
-        result = convert_to_mp3(file_data)
-    except EncodingError as e:
-        raise HTTPException(status_code=400, detail=f'Unable to convert audio to mp3 format.') from e
-    return {**file.__dict__, 'type': file_type}
+    task = db.create_new_task()
+    temp_file = db.save_temp_file(db.TempFile(file_name=file.filename, data=file_data, task_id=task.id))
+    logger.info('Publishing convert audio task for temp_file_id %s', temp_file.id)
+    convert_audio.delay(temp_file.id)
+    return UploadResponse(
+        task_id=task.id,
+        task_status=task.status,
+    )

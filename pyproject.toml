@@ -9,16 +9,18 @@ readme = "README.md"
 python = "^3.10"
 faster-whisper = "^0.9.0"
 sqlalchemy = "^2.0.23"
-pydantic = "^2.5.0"
-pydantic-settings = "^2.0.3"
 fastapi = "^0.104.1"
 gunicorn = "^21.2.0"
 python-multipart = "^0.0.6"
 python-magic = "^0.4.27"
 pydub = "^0.25.1"
 uvicorn = "^0.24.0.post1"
-nvidia-cublas-cu11 = "^11.11.3.6"
-nvidia-cudnn-cu11 = "^8.9.6.50"
+psycopg = "^3.1.9"
+psycopg2-binary = "^2.9.6"
+celery = "^5.3.5"
+cython = "^3.0.5"
+nemo-toolkit = {version = "^1.21", extras = ["asr"]}
+
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.5"
@@ -27,3 +29,21 @@ isort = "^5.12.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+[tool.ruff.lint.extend-per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
