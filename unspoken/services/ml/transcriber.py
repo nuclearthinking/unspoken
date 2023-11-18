@@ -1,5 +1,7 @@
-from faster_whisper import WhisperModel
 from io import BytesIO
+
+from faster_whisper import WhisperModel
+
 from unspoken.settings import settings
 
 
