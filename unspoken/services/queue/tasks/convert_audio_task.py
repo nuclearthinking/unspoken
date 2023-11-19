@@ -4,7 +4,9 @@ from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services import db
 from unspoken.services.audio.converter import convert_to_mp3, convert_to_wav
 from unspoken.services.queue.broker import celery
-from unspoken.services.queue.tasks import transcribe_audio
+
+from .diarize_audio_task import diarize_audio
+from .transcribe_audio_task import transcribe_audio
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ def convert_audio(temp_file_id: int) -> None:
         logger.error('Not found task for temporary file id: %s', temp_file_id)
         db.remove_temp_file(temp_file_id)
         return
-    db.update_task(task, status=TaskStatus.audio_converting)
+    db.update_task(task, status=TaskStatus.processing)
     mp3_audio = convert_to_mp3(file.data)
     wav_audio = convert_to_wav(file.data)
     audio = db.create_audio(
@@ -34,6 +36,8 @@ def convert_audio(temp_file_id: int) -> None:
     db.update_task(task, audio_id=audio.id)
     logger.info('Publishing transcribe audio task for task_id: %s', task.id)
     transcribe_audio.delay(task.id)
+    logger.info('Publish diarize audio task for task_id: %s', task.id)
+    diarize_audio.delay(task.id)
     logger.info('Removing temporary file id: %s', temp_file_id)
     db.remove_temp_file(temp_file_id)
     logger.info('Audio converted successfully.')

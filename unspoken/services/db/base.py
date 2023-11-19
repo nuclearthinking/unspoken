@@ -2,10 +2,10 @@ import datetime
 import logging
 
 import sqlalchemy as sa
-from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
-                            relationship, scoped_session, sessionmaker)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, scoped_session, sessionmaker
 
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.exceptions import TranscriptNotFound
 from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -46,8 +46,8 @@ class Transcript(Base):
     __tablename__ = 'transcript'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    audio_id: Mapped[int] = mapped_column(sa.ForeignKey(Audio.id), nullable=False)
-    text: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    transcription_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
+    diarization_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
@@ -56,10 +56,14 @@ class Task(Base):
     __tablename__ = 'task'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    status: Mapped[TaskStatus] = mapped_column(sa.Enum(TaskStatus), nullable=False, default=TaskStatus.queued)
+    status: Mapped[TaskStatus] = mapped_column(
+        sa.Enum(TaskStatus, native_enum=False),
+        nullable=False,
+        default=TaskStatus.queued,
+    )
     audio_id: Mapped[int] = mapped_column(sa.ForeignKey(Audio.id), nullable=True)
     audio: Mapped[Audio] = relationship(Audio, foreign_keys=[audio_id], lazy='joined')
-    transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=True)
+    transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
     transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
 
 
@@ -73,7 +77,9 @@ class TempFile(Base):
 
 
 def create_new_task() -> Task:
-    task = Task()
+    task = Task(
+        transcript=Transcript(),
+    )
     session.add(task)
     session.commit()
     return task
@@ -113,3 +119,21 @@ def update_task(task: Task, **kwargs) -> Task:
         setattr(task, key, value)
     session.commit()
     return task
+
+
+def save_transcription_result(id_, result: dict) -> None:
+    query = sa.select(Transcript).where(Transcript.id == id_)
+    transcript = session.execute(query).scalar_one_or_none()
+    if not transcript:
+        raise TranscriptNotFound(f'Transcript with id {id_} not found')
+    transcript.transcription_result = result
+    session.commit()
+
+
+def save_diarization_result(id_, result: dict) -> None:
+    query = sa.select(Transcript).where(Transcript.id == id_)
+    transcript = session.execute(query).scalar_one_or_none()
+    if not transcript:
+        raise TranscriptNotFound(f'Transcript with id {id_} not found')
+    transcript.diarization_result = result
+    session.commit()

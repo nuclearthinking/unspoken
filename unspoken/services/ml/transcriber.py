@@ -2,6 +2,7 @@ from io import BytesIO
 
 from faster_whisper import WhisperModel
 
+from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.settings import settings
 
 
@@ -14,12 +15,18 @@ class Transcriber:
             download_root='models',
         )
 
-    def transcribe(self, audio: bytes) -> str:
-        segments, info = self._model.transcribe(BytesIO(audio), language='ru')
-        result = []
+    def transcribe(self, audio: bytes) -> TranscriptionResult:
+        segments, info = self._model.transcribe(BytesIO(audio), language='ru', vad_filter=False)
+        result = TranscriptionResult()
         for segment in segments:
-            result.append(segment)
-            print(segment)
+            result.segments.append(
+                TranscriptionSegment(
+                    id=segment.id,
+                    start=segment.start,
+                    end=segment.end,
+                    text=segment.text.strip(),
+                )
+            )
         return result
 
 

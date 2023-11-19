@@ -19,7 +19,6 @@ def transcribe_audio(task_id: int):
         logger.error('Task with id: %s has no audio, therefore cannot be transcribed.', task_id)
         db.update_task(task, status=TaskStatus.failed)
         return
-    db.update_task(task, status=TaskStatus.transcribing)
-    transcript = TranscriberFactory.get_transcriber().transcribe(task.audio.mp3_data)
-    logger.info('Finished transcribing audio for task_id: %s, transcript %s', task_id, transcript)
+    transcription_result = TranscriberFactory.get_transcriber().transcribe(task.audio.mp3_data)
     logger.info('Finished transcribing audio for task_id: %s', task_id)
+    db.save_transcription_result(task.transcript_id, transcription_result.dict())

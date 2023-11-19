@@ -1,12 +1,17 @@
 from pydantic import BaseSettings
 
+from unspoken.enitites.enums.nemo_type import NemoDomainType
+
 
 class _Settings(BaseSettings):
-    # MODEL SETTINGS
-    whisper_model: str = 'openai/whisper-large-v3'
+    # WHISPER SETTINGS
+    whisper_model: str = 'large-v2'
     device: str = 'cuda'
     device_index: int = 0
     compute_type: str = 'float16'
+
+    # NEMO SETTINGS
+    nemo_domain_type: NemoDomainType = NemoDomainType.telephonic
 
     # DB SETTINGS
     db_host: str = '0.0.0.0'

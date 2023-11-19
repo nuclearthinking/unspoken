@@ -4,3 +4,7 @@ class UnspokenException(Exception):
 
 class EncodingError(UnspokenException):
     """Raised when an encoding error occurs."""
+
+
+class TranscriptNotFound(UnspokenException):
+    """Raised when a transcript cannot be found."""
