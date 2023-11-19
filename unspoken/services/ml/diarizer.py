@@ -35,7 +35,8 @@ class Diarizer:
             f.flush()
         return wav_path
 
-    def _write_manifest_file(self, output_dir: Path, audio_file_path: Path):
+    @staticmethod
+    def _write_manifest_file(output_dir: Path, audio_file_path: Path):
         with open(output_dir / 'input_manifest.json', 'w') as fp:
             json.dump(
                 {
@@ -65,6 +66,7 @@ class Diarizer:
                     start=float(start),
                     end=float(start) + float(duration),
                     speaker=speaker,
+                    duration=duration,
                 )
             )
         result.speakers = list(speakers)
@@ -76,7 +78,7 @@ class Diarizer:
         self._write_manifest_file(output_dir, source_audio_path)
         config.diarizer.manifest_filepath = os.path.join(output_dir, 'input_manifest.json')
         config.diarizer.out_dir = output_dir
-        config.diarizer.vad.parameters.onset = 0.5  # 0.8
-        config.diarizer.vad.parameters.offset = 0.5  # 0.6
-        config.diarizer.vad.parameters.pad_offset = -0.05
+        config.diarizer.vad.parameters.onset = 0.8  # 0.8
+        config.diarizer.vad.parameters.offset = 0.6  # 0.6
+        config.diarizer.vad.parameters.pad_offset = 0.05  # -0.05
         return config

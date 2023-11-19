@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from unspoken.api.transcribe import transcribe_router
+from unspoken.api.tasks import tasks_router
 from unspoken.api.upload import upload_router
 from unspoken.services.db.base import setup as db_setup
 
@@ -12,7 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger('uvicorn')
 
 app = FastAPI(debug=True)
-app.include_router(transcribe_router)
+app.include_router(tasks_router)
 app.include_router(upload_router)
 
 

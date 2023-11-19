@@ -2,7 +2,7 @@ import datetime
 import logging
 from datetime import timezone
 
-import torch.cuda
+import torch
 
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services import db
@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 @celery.task(
-    name='transcribe_audio',
+    name='speach_to_text',
     ignore_result=True,
     queue=settings.high_resource_demand_queue,
-    routing_key='high.transcribe_audio',
+    routing_key='high.speach_to_text',
     bind=True,
     max_retries=5,
 )
-def transcribe_audio(self, task_id: int):
+def speach_to_text(self, task_id: int):
     torch.cuda.empty_cache()
     logger.info('Transcribing audio for task_id: %s', task_id)
     task = db.get_task(task_id)
@@ -45,5 +45,12 @@ def transcribe_audio(self, task_id: int):
     if not transcription_result:
         logging.error('Emtpy transcription result!')
         return
-    db.save_transcription_result(task.transcript_id, transcription_result.dict())
+    db.save_speach_to_text_result(task.transcript_id, transcription_result.dict())
+    logger.info('Checking is task completed for task_id %s.', task_id)
+    celery.send_task(
+        name='complete_transcription',
+        args=(task_id,),
+        queue=settings.low_resource_demand_queue,
+        routing_key='low.complete_transcription',
+    )
     logger.info('Finished transcribing audio for task_id: %s', task_id)

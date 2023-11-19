@@ -5,6 +5,7 @@ class SpeakerSegment(BaseModel):
     id: int
     start: float
     end: float
+    duration: float
     speaker: str
 
 

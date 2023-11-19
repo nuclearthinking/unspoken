@@ -2,11 +2,13 @@ from pydantic import BaseModel, Field
 
 
 class TranscriptionSegment(BaseModel):
-    id: int
     start: float
     end: float
     text: str
+    speaker: str
 
 
 class TranscriptionResult(BaseModel):
-    segments: list[TranscriptionSegment] = Field(default_factory=list)
+    messages: list[TranscriptionSegment] = Field(default_factory=list)
+    file_name: str = None
+    duration: float = None

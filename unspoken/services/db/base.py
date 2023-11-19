@@ -46,8 +46,9 @@ class Transcript(Base):
     __tablename__ = 'transcript'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    transcription_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
+    speach_to_text_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
     diarization_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
+    transcription_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
@@ -121,12 +122,12 @@ def update_task(task: Task, **kwargs) -> Task:
     return task
 
 
-def save_transcription_result(id_, result: dict) -> None:
+def save_speach_to_text_result(id_, result: dict) -> None:
     query = sa.select(Transcript).where(Transcript.id == id_)
     transcript = session.execute(query).scalar_one_or_none()
     if not transcript:
-        raise TranscriptNotFound(f'Transcript with id {id_} not found')
-    transcript.transcription_result = result
+        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+    transcript.speach_to_text_result = result
     session.commit()
 
 
@@ -134,6 +135,15 @@ def save_diarization_result(id_, result: dict) -> None:
     query = sa.select(Transcript).where(Transcript.id == id_)
     transcript = session.execute(query).scalar_one_or_none()
     if not transcript:
-        raise TranscriptNotFound(f'Transcript with id {id_} not found')
+        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
     transcript.diarization_result = result
+    session.commit()
+
+
+def save_transcription_result(id_, result: dict) -> None:
+    query = sa.select(Transcript).where(Transcript.id == id_)
+    transcript = session.execute(query).scalar_one_or_none()
+    if not transcript:
+        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+    transcript.transcription_result = result
     session.commit()
