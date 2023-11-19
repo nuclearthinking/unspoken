@@ -1,9 +1,9 @@
 from io import BytesIO
 
+import torch
 from faster_whisper import WhisperModel
 
-from unspoken.enitites.transcription import (TranscriptionResult,
-                                             TranscriptionSegment)
+from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.settings import settings
 
 
@@ -28,6 +28,8 @@ class Transcriber:
                     text=segment.text.strip(),
                 )
             )
+        del self._model
+        torch.cuda.empty_cache()
         return result
 
 

@@ -26,6 +26,10 @@ class _Settings(BaseSettings):
     rabbitmq_vhost: str = '/'
     rabbitmq_user: str
     rabbitmq_password: str
+    high_resource_demand_queue: str = 'high_resource_demand'
+    high_resource_demand_routing_key: str = 'high.#'
+    low_resource_demand_queue: str = 'low_resource_demand'
+    low_resource_demand_routing_key: str = 'low.#'
 
 
 settings = _Settings()

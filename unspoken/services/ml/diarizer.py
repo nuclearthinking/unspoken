@@ -4,6 +4,7 @@ import shutil
 import uuid
 from pathlib import Path
 
+import torch.cuda
 from nemo.collections.asr.models import NeuralDiarizer
 from omegaconf import OmegaConf
 
@@ -13,6 +14,7 @@ from unspoken.settings import settings
 
 class Diarizer:
     def diarize_audio(self, wav_data: bytes) -> DiarizationResult:
+        torch.cuda.empty_cache()
         diarization_dir = Path.cwd() / 'diarization' / str(uuid.uuid4())
         try:
             diarization_dir.mkdir(parents=True, exist_ok=True)
