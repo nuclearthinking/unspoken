@@ -2,8 +2,7 @@ import datetime
 import logging
 
 import sqlalchemy as sa
-from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
-                            relationship, scoped_session, sessionmaker)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, scoped_session, sessionmaker
 
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.exceptions import TranscriptNotFound
