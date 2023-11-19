@@ -1,15 +1,15 @@
-import json
 import os
-import shutil
+import json
 import uuid
+import shutil
 from pathlib import Path
 
 import torch.cuda
-from nemo.collections.asr.models import NeuralDiarizer
 from omegaconf import OmegaConf
+from nemo.collections.asr.models import NeuralDiarizer
 
-from unspoken.enitites.diarization import DiarizationResult, SpeakerSegment
 from unspoken.settings import settings
+from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
 
 
 class Diarizer:

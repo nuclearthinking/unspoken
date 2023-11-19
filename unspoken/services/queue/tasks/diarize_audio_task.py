@@ -1,15 +1,14 @@
-import datetime
 import logging
+import datetime
 from datetime import timezone
 
 import torch
 
-from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services import db
+from unspoken.settings import settings
 from unspoken.services.ml.diarizer import Diarizer
 from unspoken.services.queue.broker import celery
-from unspoken.settings import settings
-
+from unspoken.enitites.enums.task_status import TaskStatus
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,10 @@
 import logging
 
-from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services import db
-from unspoken.services.audio.converter import convert_to_mp3, convert_to_wav
-from unspoken.services.queue.broker import celery
 from unspoken.settings import settings
+from unspoken.services.queue.broker import celery
+from unspoken.services.audio.converter import convert_to_mp3, convert_to_wav
+from unspoken.enitites.enums.task_status import TaskStatus
 
 logger = logging.getLogger(__name__)
 

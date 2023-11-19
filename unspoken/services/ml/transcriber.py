@@ -1,10 +1,13 @@
+import logging
 from io import BytesIO
 
 import torch
 from faster_whisper import WhisperModel
 
-from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 from unspoken.settings import settings
+from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
+
+logger = logging.getLogger(__name__)
 
 
 class Transcriber:
@@ -17,9 +20,10 @@ class Transcriber:
         )
 
     def transcribe(self, audio: bytes) -> SpeachToTextResult:
-        segments, info = self._model.transcribe(BytesIO(audio), language='ru', vad_filter=False)
+        segments, info = self._model.transcribe(BytesIO(audio), language='ru', word_timestamps=True)
         result = SpeachToTextResult()
         for segment in segments:
+            logger.info('Segment %s', segment)
             result.segments.append(
                 SpeachToTextSegment(
                     id=segment.id,

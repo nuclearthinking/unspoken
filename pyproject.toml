@@ -19,7 +19,7 @@ psycopg = "^3.1.9"
 psycopg2-binary = "^2.9.6"
 celery = "^5.3.5"
 cython = "^3.0.5"
-nemo-toolkit = {version = "^1.21", extras = ["asr"]}
+nemo-toolkit = { version = "^1.21", extras = ["asr"] }
 
 
 [tool.poetry.group.dev.dependencies]
@@ -47,3 +47,7 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
+[tool.isort]
+length_sort = true
+multi_line_output = 3
+line_length = 120

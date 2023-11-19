@@ -1,14 +1,14 @@
 import logging
-from collections import defaultdict
 from operator import itemgetter
+from collections import defaultdict
 
-from unspoken.enitites.diarization import DiarizationResult, SpeakerSegment
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.enitites.speach_to_text import SpeachToTextResult
-from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.services import db
-from unspoken.services.queue.broker import celery
 from unspoken.settings import settings
+from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
+from unspoken.services.queue.broker import celery
+from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
+from unspoken.enitites.speach_to_text import SpeachToTextResult
+from unspoken.enitites.enums.task_status import TaskStatus
 
 logger = logging.getLogger(__name__)
 
@@ -68,10 +68,7 @@ def get_who_speaking(start: float, end: float, segments: list[SpeakerSegment]) -
     speaker_counter = defaultdict(float)
     hit_segments = []
     for segment in segments:
-        if (
-            start <= segment.start <= end and start <= segment.end
-            or segment.start <= start <= segment.end
-        ):
+        if start <= segment.start <= end and start <= segment.end or segment.start <= start <= segment.end:
             hit_segments.append(segment)
             speaker_counter[segment.speaker] += segment.end - start
     if not speaker_counter:

@@ -1,5 +1,5 @@
-from celery import Celery
 from kombu import Queue
+from celery import Celery
 
 from unspoken.settings import settings
 

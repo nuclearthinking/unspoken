@@ -1,12 +1,12 @@
 import logging
 
 import magic
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, UploadFile, HTTPException
 
-from unspoken.enitites.api.upload import UploadResponse
-from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.services import db
+from unspoken.enitites.api.upload import UploadResponse
 from unspoken.services.queue.tasks import convert_audio
+from unspoken.enitites.enums.mime_types import MimeType
 
 upload_router = APIRouter(prefix='/upload')
 

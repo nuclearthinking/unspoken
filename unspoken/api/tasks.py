@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
 
-from unspoken.enitites.api.tasks import TaskResponse
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.enitites.transcription import TranscriptionResult
 from unspoken.services import db
+from unspoken.enitites.api.tasks import TaskResponse
+from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.enitites.enums.task_status import TaskStatus
 
 tasks_router = APIRouter(prefix='/task')
 

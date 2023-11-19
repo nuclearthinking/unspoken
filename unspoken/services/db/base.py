@@ -1,12 +1,12 @@
-import datetime
 import logging
+import datetime
 
 import sqlalchemy as sa
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, scoped_session, sessionmaker
+from sqlalchemy.orm import Mapped, DeclarativeBase, relationship, sessionmaker, mapped_column, scoped_session
 
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.exceptions import TranscriptNotFound
 from unspoken.settings import settings
+from unspoken.exceptions import TranscriptNotFound
+from unspoken.enitites.enums.task_status import TaskStatus
 
 logger = logging.getLogger(__name__)
 

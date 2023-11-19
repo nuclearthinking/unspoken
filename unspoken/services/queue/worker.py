@@ -1,8 +1,5 @@
+from .tasks import convert_audio, diarize_audio, speach_to_text, complete_transcription
 from .broker import celery
-from .tasks import complete_transcription
-from .tasks import convert_audio
-from .tasks import diarize_audio
-from .tasks import speach_to_text
 
 worker = celery
 worker.register_task(complete_transcription)
