@@ -1,6 +1,6 @@
 # UNSPOKEN
 
-Convert audio to conversation separeted by speakers.
+Convert audio to text-conversation separeted by speakers.
 
 
 Start with this command. 
