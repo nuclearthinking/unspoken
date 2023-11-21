@@ -7,16 +7,19 @@ import {
   useItemProgressListener,
   useItemFinishListener,
 } from "@rpldy/uploady";
-import { Circle } from "rc-progress";
+import { Line } from "rc-progress";
 import { useNavigate } from "react-router-dom";
+
+
 const UploadProgress = () => {
   const [uploads, setUploads] = React.useState({});
+  
   const progressData = useItemProgressListener();
+  
   const navigate = useNavigate();
   useItemFinishListener((item) => {
     console.log(item);
     if ((item.state == "finished") & (item.uploadStatus == 200)) {
-      console.log("finished loading, performing redirect", item);
       navigate(`/tasks/${item.uploadResponse.data.task_id}`);
     }
   });
@@ -46,14 +49,11 @@ const UploadProgress = () => {
 
         return (
           <div key={id}>
-            <Circle
+            <Line
               strokeWidth={2}
               strokeColor={lastProgress === 100 ? "#00a626" : "#2db7f5"}
               percent={lastProgress}
             />
-            <p>
-              {id} : {name}
-            </p>
           </div>
         );
       })}
@@ -80,11 +80,8 @@ const DropZone = () => {
       className={isDragging ? "drag-over" : ""}
       style={{
         border: "2px solid black",
-        width: "98%",
-        height: "98%",
-        position: "absolute",
-        top: 0,
-        left: 0,
+        width: "35vw",
+        height: "30vh",
       }}
     >
       <p>Drop File(s) Here</p>
