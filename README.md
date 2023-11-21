@@ -27,12 +27,12 @@ In response, you will receive task_id
 Then call endpoint with received task_id, to see current task state
 
 ```bash
-curl --location '0.0.0.0:8000/task/17'
+curl --location '0.0.0.0:8000/task/21'
 ```
 
 ```json
 {
-  "id": 18,
+  "id": 21,
   "status": "completed",
   "file_name": "file_name",
   "speakers": [
