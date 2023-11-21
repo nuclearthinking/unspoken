@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 async def upload_audio(file: UploadFile):
     file_data = await file.read()
     file_type = magic.from_buffer(file_data[:2048], mime=True)
-    if not MimeType(file_type).is_audio():
-        raise HTTPException(status_code=400, detail='File is not audio.')
+    if not MimeType(file_type).is_supported():
+        raise HTTPException(status_code=400, detail=f'File format {file_type} is not supported.')
     task = db.create_new_task()
     temp_file = db.save_temp_file(db.TempFile(file_name=file.filename, data=file_data, task_id=task.id))
     logger.info('Publishing convert audio task for temp_file_id %s', temp_file.id)
