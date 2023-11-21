@@ -29,7 +29,8 @@ Then call endpoint with received task_id, to see current task state
 ```bash
 curl --location '0.0.0.0:8000/task/21'
 ```
-
+After task were finished processing, it changes status to `completed` and result will contain array of transcribed
+messages with data like timestamps and speaker.
 ```json
 {
   "id": 21,
@@ -55,9 +56,6 @@ curl --location '0.0.0.0:8000/task/21'
   ]
 }
 ```
-
-After task were finished processing, it changes status to `completed` and result will contain array of transcribed
-messages with data like timestamps and speaker.
 
 Current accuracy of STT and Speaker Diarization is still not that good, but still could be good enough for some
 purposes.
