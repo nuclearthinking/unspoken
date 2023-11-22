@@ -9,13 +9,16 @@ import {
 } from "@rpldy/uploady";
 import { Line } from "rc-progress";
 import { useNavigate } from "react-router-dom";
+import "../index.css";
+
+
 
 
 const UploadProgress = () => {
   const [uploads, setUploads] = React.useState({});
-  
+
   const progressData = useItemProgressListener();
-  
+
   const navigate = useNavigate();
   useItemFinishListener((item) => {
     console.log(item);
@@ -77,14 +80,14 @@ const DropZone = () => {
   return (
     <div
       ref={dropRef}
-      className={isDragging ? "drag-over" : ""}
+      className={isDragging ? "drag-over" : "drop-zone"}
       style={{
-        border: "2px solid black",
         width: "35vw",
         height: "30vh",
       }}
     >
-      <p>Drop File(s) Here</p>
+      <p/>
+      <p className="font-mono text-white text-lg">Drop File Here</p>
     </div>
   );
 };

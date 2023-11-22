@@ -18,3 +18,87 @@ span {
   /* thing to center */
   margin: auto;
 }
+
+.messages-container {
+  margin-bottom: 10px;
+}
+
+.message {
+  margin-bottom: 10px;
+}
+
+.uncopy {
+  user-select: none;
+}
+
+.hidden-text {
+  font-size: 0;
+}
+
+.drop-zone-suplementary {
+}
+
+.drop-zone {
+  @apply 
+  flex
+  items-center
+  place-content-center
+  rounded-lg 
+  drop-zone-suplementary 
+  border
+  shadow-xl
+  bg-gradient-to-t 
+  from-indigo-200 
+  to-violet-400
+}
+
+
+.message-blue {
+  @apply 
+  bg-gradient-to-b
+  from-cyan-100
+  to-blue-200
+}
+
+.message-indigo {
+  @apply 
+  bg-gradient-to-b
+  from-indigo-50
+  to-indigo-200
+}
+
+.message-violet { 
+  @apply 
+  bg-gradient-to-b
+  from-violet-50
+  to-violet-200
+}
+
+.message-purple {
+  @apply 
+  bg-gradient-to-b
+  from-purple-50
+  to-purple-200
+}
+
+.message-fuchsia {
+  @apply 
+  bg-gradient-to-b
+  from-fuchsia-50
+  to-fuchsia-200
+}
+
+.message-pink {
+  @apply 
+  bg-gradient-to-b
+  from-white
+  to-pink-100
+}
+
+
+.message-rose {
+  @apply 
+  bg-gradient-to-b
+  from-rose-100
+  to-rose-300
+}

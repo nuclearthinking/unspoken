@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/react";
-import '../index.css'
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Chip,
+  Spacer,
+} from "@nextui-org/react";
+import StatusChip from "../components/status";
+import Message from "../components/message";
+import "../index.css";
 
 function Tasks() {
   const [data, setData] = useState(null);
@@ -18,31 +27,37 @@ function Tasks() {
 
   if (data.status != "completed") {
     return (
-      <div>
-        <h1>Task id: {data.id}</h1>
-        <h2>Status: {data.status}</h2>
-
-        <p>File name: {data.file_name}</p>
+      <div className="flex flex-row">
+        <div className="basis-1/6">
+          <Chip radius="sm">id: {data.id}</Chip>
+        </div>
+        <div className="basis-1/6">
+          <StatusChip status={data.status} />
+        </div>
+        <div className="basis-2/3">
+          <p className="font-mono line-clamp-1">{data.file_name}</p>
+        </div>
       </div>
     );
   }
-  console.log(data);
   return (
     <div>
-      <h1 className="text-xl font-bold">Task id: {data.id}</h1>
-      <h2>Status: {data.status}</h2>
-
-      <p>File name: {data.file_name}</p>
+      <div className="flex flex-row">
+        <div className="basis-1/6">
+          <Chip radius="sm">id: {data.id}</Chip>
+        </div>
+        <div className="basis-1/6">
+          <StatusChip status={data.status} />
+        </div>
+        <div classname="basis-2/3">
+          <p className="font-mono line-clamp-1">{data.file_name}</p>
+        </div>
+      </div>
+      <Spacer y={3} />
 
       <div>
         {data.messages.map((message, i) => (
-          <Card key={i}>
-            <CardBody>
-              <p>
-                {message.speaker}: {message.text}
-              </p>
-            </CardBody>
-          </Card>
+          <Message key={i} text={message.text} speaker={message.speaker} />
         ))}
       </div>
     </div>
