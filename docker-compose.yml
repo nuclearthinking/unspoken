@@ -59,7 +59,7 @@ services:
         source: ./models
         target: /app/models
       - type: bind
-        source: /home/nuclearthinking/.cache/torch/NeMo/NeMo_1.21.0/
+        source: /root/.cache/torch/NeMo/NeMo_1.21.0/
         target: /root/.cache/torch/NeMo/NeMo_1.21.0/
     depends_on:
       - amqp
