@@ -13,9 +13,6 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./frontend/unspoken/dist
-        target: /data/caddy
-      - type: bind
         source: ./Caddyfile
         target: /etc/caddy/Caddyfile
       - type: bind
@@ -27,8 +24,8 @@ services:
     build: .
     command: gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
     restart: always
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     environment:
       db_user: "unspoken"
       db_password: "changeme"

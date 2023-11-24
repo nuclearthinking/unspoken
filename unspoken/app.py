@@ -16,17 +16,14 @@ app = FastAPI(debug=True)
 app.include_router(tasks_router)
 app.include_router(upload_router)
 
-origins = [
-    "http://localhost:5173"
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_methods=['*'],
+    allow_headers=['*'],
+    expose_headers=['*'],
 )
 
 

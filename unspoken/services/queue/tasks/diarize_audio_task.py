@@ -44,7 +44,11 @@ def diarize_audio(self, task_id: int):
         self.retry(exc=e, countdown=5)
     except Exception as e:
         logger.error('Failed to diarize audio for task_id: %s.', task_id, exc_info=e)
-        db.update_task(task, status=TaskStatus.failed, updated_at=datetime.datetime.now(timezone.utc))
+        db.update_task(
+            task,
+            status=TaskStatus.failed,
+            updated_at=datetime.datetime.now(timezone.utc),
+        )
         return
     if not diarization_result:
         logger.error('Empty diarization result!')

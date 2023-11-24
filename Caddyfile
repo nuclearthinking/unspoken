@@ -1,7 +1,7 @@
 {
         debug
 }
-localhost:80 {
+:80 {
         root * /var/www/app
         file_server {
                 index index.html

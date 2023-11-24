@@ -40,7 +40,11 @@ def speach_to_text(self, task_id: int):
         self.retry(exc=e, countdown=5)
     except Exception as e:
         logger.error('Failed to transcribe audio for task_id: %s', task_id, exc_info=e)
-        db.update_task(task, status=TaskStatus.failed, updated_at=datetime.datetime.now(timezone.utc))
+        db.update_task(
+            task,
+            status=TaskStatus.failed,
+            updated_at=datetime.datetime.now(timezone.utc),
+        )
         return
     if not transcription_result:
         logging.error('Emtpy transcription result!')
