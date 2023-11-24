@@ -1,0 +1,17 @@
+{
+        debug
+}
+localhost:80 {
+        root * /var/www/app
+        file_server {
+                index index.html
+        }
+
+        encode gzip
+
+        log {
+                format console
+                level INFO
+                output stdout
+        }
+}

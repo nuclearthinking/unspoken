@@ -11,9 +11,6 @@ import { Line } from "rc-progress";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 
-
-
-
 const UploadProgress = () => {
   const [uploads, setUploads] = React.useState({});
 
@@ -86,16 +83,23 @@ const DropZone = () => {
         height: "30vh",
       }}
     >
-      <p/>
+      <p />
       <p className="font-mono text-white text-lg">Drop File Here</p>
     </div>
   );
 };
 
 function Root() {
+  console.log(import.meta.env.VITE_API_URL, 'api uir')
+  console.log(import.meta.env.PROD, 'prod?')
+  console.log(import.meta.env.DEV, 'dev?')
+  console.log(import.meta.env.MODE, 'mode?')
+  console.log(import.meta.env.BASE_URL, 'base url?')
   return (
     <DndProvider backend={HTML5Backend}>
-      <Uploady destination={{ url: "http://0.0.0.0:8000/upload/audio" }}>
+      <Uploady
+        destination={{ url: import.meta.env.VITE_API_URL + "/upload/audio" }}
+      >
         <DropZone />
         <UploadProgress />
       </Uploady>

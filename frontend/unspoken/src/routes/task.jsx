@@ -16,7 +16,7 @@ function Tasks() {
   const [data, setData] = useState(null);
   const { id } = useParams();
   useEffect(() => {
-    fetch(`http://0.0.0.0:8000/task/${id}`)
+    fetch(import.meta.env.VITE_API_URL+`/task/${id}`)
       .then((response) => response.json())
       .then((data) => setData(data));
   }, [id]);
