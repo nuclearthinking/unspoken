@@ -3,6 +3,7 @@
 }
 :80 {
         root * /var/www/app
+        try_files {path} /index.html
         file_server {
                 index index.html
         }
