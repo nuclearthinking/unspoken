@@ -1,7 +1,6 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
 export default function Message(props) {
-  console.log("props, ", props);
   const { speaker, text } = props;
 
   var messageStyle = "";
@@ -30,8 +29,8 @@ export default function Message(props) {
   }
 
   return (
-    <Card className={`message ` + messageStyle}>
-      <CardHeader className="justify-between">
+    <Card className={`message flat ` + messageStyle} variant="flat">
+      <CardHeader className="justify-between" variant="flat">
         <div className="flex gap-4">
           <div className="flex  items-start justify-center uncopy">
             <h5 className="text-small tracking-tight text-default-400">
@@ -40,7 +39,7 @@ export default function Message(props) {
           </div>
         </div>
       </CardHeader>
-      <CardBody>
+      <CardBody variant="flat">
         <p className="font-mono">
           <span className="hidden-text">{speaker}: </span>
           {text}

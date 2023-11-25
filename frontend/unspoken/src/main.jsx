@@ -7,6 +7,12 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./error-page.jsx";
 import { NextUIProvider } from "@nextui-org/react";
 
+const fetchData = async (id) => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/task/${id}/`);
+  const data = await response.json();
+  return data;
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -15,8 +21,17 @@ const router = createBrowserRouter([
   },
   {
     path: "/tasks/:id",
+    loader: async ({ params }) => {
+      const data = await fetchData(params.id);
+      return {data}
+    },
     element: <Tasks />,
     errorElement: <ErrorPage />,
+    
+  },
+  {
+    path: "/404",
+    element: <ErrorPage />,
   },
 ]);
 

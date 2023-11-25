@@ -1,41 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Chip,
-  Spacer,
-} from "@nextui-org/react";
+  useParams,
+  useNavigate,
+  useLoaderData,
+  useNavigation,
+} from "react-router-dom";
+import { Chip, Spacer, Spinner } from "@nextui-org/react";
 import StatusChip from "../components/status";
 import Message from "../components/message";
 import "../index.css";
 
-function Tasks() {
-  const [data, setData] = useState(null);
+function Tasks(props) {
   const { id } = useParams();
+  const loadedData = useLoaderData();
+  const { data } = loadedData;
+  const { state } = useNavigation();
+
   useEffect(() => {
-    fetch(import.meta.env.VITE_API_URL+`/task/${id}`)
-      .then((response) => response.json())
-      .then((data) => setData(data));
+    console.log(loadedData);
   }, [id]);
 
-  if (data === null) {
-    return <div>Loading...</div>;
+  if (state === "loading") {
+    return <Spinner color="secondary" size="lg" />;
   }
 
-  if (data.status != "completed") {
+  if (data?.status !== "completed") {
+    console.log("data:", data);
     return (
       <div className="flex flex-row">
         <div className="basis-1/6">
-          <Chip radius="sm">id: {data.id}</Chip>
+          <Chip radius="sm">id: {data?.id}</Chip>
         </div>
         <div className="basis-1/6">
-          <StatusChip status={data.status} />
+          <StatusChip status={data?.status} />
         </div>
         <div className="basis-2/3">
-          <p className="font-mono line-clamp-1">{data.file_name}</p>
+          <p className="font-mono line-clamp-1">{data?.file_name}</p>
         </div>
       </div>
     );
@@ -49,7 +49,7 @@ function Tasks() {
         <div className="basis-1/6">
           <StatusChip status={data.status} />
         </div>
-        <div classname="basis-2/3">
+        <div className="basis-2/3">
           <p className="font-mono line-clamp-1">{data.file_name}</p>
         </div>
       </div>

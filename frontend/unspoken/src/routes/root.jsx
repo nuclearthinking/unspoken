@@ -77,7 +77,7 @@ const DropZone = () => {
   return (
     <div
       ref={dropRef}
-      className={isDragging ? "drag-over" : "drop-zone"}
+      className={isDragging ? "drop-zone-hover" : "drop-zone"}
       style={{
         width: "35vw",
         height: "30vh",
@@ -90,11 +90,6 @@ const DropZone = () => {
 };
 
 function Root() {
-  console.log(import.meta.env.VITE_API_URL, 'api uir')
-  console.log(import.meta.env.PROD, 'prod?')
-  console.log(import.meta.env.DEV, 'dev?')
-  console.log(import.meta.env.MODE, 'mode?')
-  console.log(import.meta.env.BASE_URL, 'base url?')
   return (
     <DndProvider backend={HTML5Backend}>
       <Uploady
