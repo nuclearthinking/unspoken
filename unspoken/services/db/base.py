@@ -19,8 +19,12 @@ engine = sa.create_engine(
         db_name=settings.db_name,
     ),
     echo=False,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=30,
 )
-session = scoped_session(sessionmaker(autocommit=False, bind=engine))
+Session = scoped_session(sessionmaker(autocommit=False, bind=engine))
 
 
 class Base(DeclarativeBase):
@@ -81,69 +85,69 @@ def create_new_task() -> Task:
     task = Task(
         transcript=Transcript(),
     )
-    session.add(task)
-    session.commit()
+    Session.add(task)
+    Session.commit()
     return task
 
 
 def save_temp_file(file: TempFile) -> TempFile:
-    session.add(file)
-    session.commit()
+    Session.add(file)
+    Session.commit()
     return file
 
 
 def get_temp_file(id_: int) -> TempFile | None:
     query = sa.select(TempFile).where(TempFile.id == id_)
-    return session.execute(query).scalar_one_or_none()
+    return Session.execute(query).scalar_one_or_none()
 
 
 def remove_temp_file(id_: int) -> None:
     query = sa.delete(TempFile).where(TempFile.id == id_)
-    session.execute(query)
-    session.commit()
+    Session.execute(query)
+    Session.commit()
     logger.info(f'Removed temp file with id {id_}')
 
 
 def create_audio(audio: Audio) -> Audio:
-    session.add(audio)
-    session.commit()
+    Session.add(audio)
+    Session.commit()
     return audio
 
 
 def get_task(id_: int) -> Task | None:
     query = sa.select(Task).where(Task.id == id_)
-    return session.execute(query).scalar_one_or_none()
+    return Session.execute(query).scalar_one_or_none()
 
 
 def update_task(task: Task, **kwargs) -> Task:
     for key, value in kwargs.items():
         setattr(task, key, value)
-    session.commit()
+    Session.commit()
     return task
 
 
 def save_speach_to_text_result(id_, result: dict) -> None:
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = session.execute(query).scalar_one_or_none()
+    transcript = Session.execute(query).scalar_one_or_none()
     if not transcript:
         raise TranscriptNotFound(f'Transcript with id {id_} not found.')
     transcript.speach_to_text_result = result
-    session.commit()
+    Session.commit()
 
 
 def save_diarization_result(id_, result: dict) -> None:
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = session.execute(query).scalar_one_or_none()
+    transcript = Session.execute(query).scalar_one_or_none()
     if not transcript:
         raise TranscriptNotFound(f'Transcript with id {id_} not found.')
     transcript.diarization_result = result
-    session.commit()
+    Session.commit()
 
 
 def save_transcription_result(id_, result: dict) -> None:
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = session.execute(query).scalar_one_or_none()
+    transcript = Session.execute(query).scalar_one_or_none()
     if not transcript:
         raise TranscriptNotFound(f'Transcript with id {id_} not found.')
     transcript.transcription_result = result
-    session.commit()
+    Session.commit()
