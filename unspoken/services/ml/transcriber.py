@@ -20,7 +20,7 @@ class Transcriber:
         )
 
     def transcribe(self, audio: bytes) -> SpeachToTextResult:
-        segments, info = self._model.transcribe(BytesIO(audio), language='ru', word_timestamps=True)
+        segments, info = self._model.transcribe(BytesIO(audio), language='ru')
         result = SpeachToTextResult()
         for segment in segments:
             logger.info('Segment %s', segment)
