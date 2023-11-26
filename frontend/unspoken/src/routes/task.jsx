@@ -33,7 +33,7 @@ function Tasks() {
 
       return () => clearInterval(interval);
     }
-  }, [id]);
+  }, [id, task]);
 
   if (state === "loading") {
     return <Spinner color="secondary" size="lg" />;

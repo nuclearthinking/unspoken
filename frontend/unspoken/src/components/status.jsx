@@ -1,35 +1,25 @@
-import React from "react";
-import { Chip, Spinner } from "@nextui-org/react";
+import React, {memo} from "react";
+import {Chip, Spinner} from "@nextui-org/react";
 import "../index.css";
 
-export default function StatusChip(props) {
-  const { status } = props;
+function StatusChip(props) {
+    const {status, key} = props;
 
-  var color = "";
-  var endContent = "";
-  
-  switch (status) {
-    case "completed":
-      color = "success";
-      break;
-    case "failed":
-      color = "danger";
-      break;
-    case "queued":
-      color = "default";
-      
-      break;
-    case "processing":
-      color = "secondary";
-      endContent = <Spinner color="secondary" size="sm" />;
-      break;
-    default:
-      color = "default";
-  }
+    const statusMap = {
+        completed: {color: "success"},
+        failed: {color: "danger"},
+        queued: {color: "default"},
+        processing: {color: "secondary", endContent: <Spinner color="secondary" size="sm"/>},
+        default: {color: "default"}
+    }
 
-  return (
-    <Chip color={color} variant="flat" endContent={endContent}>
-      {status}
-    </Chip>
-  );
+    const {color, endContent} = statusMap[status] || statusMap.default;
+
+    return (
+        <Chip color={color} key={key} variant="flat" endContent={endContent}>
+            {status}
+        </Chip>
+    );
 }
+
+export default memo(StatusChip);
