@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useLoaderData, useNavigation, useParams } from "react-router-dom";
+import {
+  Link,
+  useLoaderData,
+  useNavigation,
+  useParams,
+} from "react-router-dom";
 import { Chip, Spacer, Spinner } from "@nextui-org/react";
 import StatusChip from "../components/status";
 import Message from "../components/message";
@@ -41,14 +46,19 @@ function Tasks() {
 
   return (
     <div>
-      <div className="flex flex-row">
-        <div className="basis-1/6">
+      <div className="flex justify-start">
+        <div className="mr-2">
+          <Link to={`/`}>
+            <img src="/home.svg" style={{width:25}}/>
+          </Link>
+        </div>
+        <div className="mr-2">
           <Chip radius="sm">id: {task.id}</Chip>
         </div>
-        <div className="basis-1/6">
+        <div className="mr-2">
           <StatusChip status={task.status} />
         </div>
-        <div className="basis-2/3">
+        <div className="mr-2" >
           <p className="font-mono line-clamp-1">{task?.file_name}</p>
         </div>
       </div>
