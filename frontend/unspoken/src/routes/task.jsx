@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {useLoaderData, useNavigation, useParams,} from "react-router-dom";
-import {Chip, Spacer, Spinner} from "@nextui-org/react";
+import React, { useEffect, useState } from "react";
+import { useLoaderData, useNavigation, useParams } from "react-router-dom";
+import { Chip, Spacer, Spinner } from "@nextui-org/react";
 import StatusChip from "../components/status";
 import Message from "../components/message";
 import "../index.css";
