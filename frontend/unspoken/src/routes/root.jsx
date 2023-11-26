@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend, NativeTypes } from "react-dnd-html5-backend";
 import {
@@ -63,6 +63,11 @@ const UploadProgress = () => {
 
 const DropZone = () => {
   const { upload } = useUploady();
+  const fileInputRef = useRef();
+
+  const handleInputChange = (e) => {
+    upload(e.target.files);
+  };
 
   const [{ isDragging }, dropRef] = useDrop({
     accept: NativeTypes.FILE,
@@ -74,6 +79,10 @@ const DropZone = () => {
     },
   });
 
+  const openFileInput = () => {
+    fileInputRef.current.click();
+  };
+
   return (
     <div
       ref={dropRef}
@@ -82,7 +91,14 @@ const DropZone = () => {
         width: "35vw",
         height: "30vh",
       }}
+      onClick={openFileInput}
     >
+      <input
+        type="file"
+        style={{ display: "none" }}
+        ref={fileInputRef}
+        onChange={handleInputChange}
+      />
       <p />
       <p className="font-mono text-white text-lg">Drop File Here</p>
     </div>
