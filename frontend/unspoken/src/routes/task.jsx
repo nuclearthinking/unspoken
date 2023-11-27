@@ -10,11 +10,6 @@ import StatusChip from "../components/status";
 import Message from "../components/message";
 import "../index.css";
 
-const fetchData = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/task/${id}/`);
-  return await response.json();
-};
-
 function Tasks() {
   const { id } = useParams();
   const { data } = useLoaderData();
@@ -26,6 +21,12 @@ function Tasks() {
   }
 
   useEffect(() => {
+    const fetchData = async (id) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/task/${id}/`
+      );
+      return await response.json();
+    };
     let interval;
     if (!isFinal(task)) {
       interval = setInterval(async () => {
@@ -49,7 +50,7 @@ function Tasks() {
       <div className="flex justify-start">
         <div className="mr-2">
           <Link to={`/`}>
-            <img src="/home.svg" style={{width:25}}/>
+            <img src="/home.svg" style={{ width: 25 }} />
           </Link>
         </div>
         <div className="mr-2">
@@ -58,7 +59,7 @@ function Tasks() {
         <div className="mr-2">
           <StatusChip status={task.status} />
         </div>
-        <div className="mr-2" >
+        <div className="mr-2">
           <p className="font-mono line-clamp-1">{task?.file_name}</p>
         </div>
       </div>

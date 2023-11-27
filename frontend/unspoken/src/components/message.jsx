@@ -3,33 +3,19 @@ import { Card, CardBody, CardHeader } from "@nextui-org/react";
 export default function Message(props) {
   const { speaker, text } = props;
 
-  var messageStyle = "";
+  const speakerStyles = {
+    speaker_0: "message-violet",
+    speaker_1: "message-blue",
+    speaker_2: "message-indigo",
+    speaker_3: "message-purple",
+    speaker_4: "message-pink",
+    unknown: "message-rose",
+  };
 
-  switch (speaker) {
-    case "speaker_0":
-      messageStyle = "message-violet";
-      break;
-    case "speaker_1":
-      messageStyle = "message-blue";
-      break;
-    case "speaker_2":
-      messageStyle = "message-indigo";
-      break;
-    case "speaker_3":
-      messageStyle = "message-purple";
-      break;
-    case "speaker_4":
-      messageStyle = "message-pink";
-      break;
-    case "unknown":
-      messageStyle = "message-rose";
-      break;
-    default:
-      messageStyle = "message-blue";
-  }
+  const messageStyle = speakerStyles[speaker] || speakerStyles.unknown;
 
   return (
-    <Card className={`message flat ` + messageStyle} variant="flat">
+    <Card className={`message flat ${messageStyle}`} variant="flat">
       <CardHeader className="justify-between" variant="flat">
         <div className="flex gap-4">
           <div className="flex  items-start justify-center uncopy">
