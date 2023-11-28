@@ -97,6 +97,7 @@ services:
       start_period: 10s
     volumes:
       - db:/var/lib/postgresql/data
+      - ./resources/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
   amqp:
     image: rabbitmq:3.9.29-management
     hostname: rabbitmq
