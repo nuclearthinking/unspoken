@@ -100,7 +100,7 @@ const DropZone = () => {
         onChange={handleInputChange}
       />
       <p />
-      <p className="font-mono text-white text-lg">Drop File Here</p>
+      <p className="font-mono text-white text-lg">Upload file</p>
     </div>
   );
 };

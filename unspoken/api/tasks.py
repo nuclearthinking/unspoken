@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from unspoken.services import db
 from unspoken.enitites.api.tasks import TaskResponse
-from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.enitites.enums.task_status import TaskStatus
 
 tasks_router = APIRouter(prefix='/task')
@@ -28,5 +28,30 @@ def get_task(id_: int):
     transcription_result = TranscriptionResult.parse_obj(task.transcript.transcription_result)
     speakers = {m.speaker for m in transcription_result.messages}
     result.speakers = list(speakers)
-    result.messages = transcription_result.messages
+    result.messages = squeeze_messages(transcription_result.messages)
     return result
+
+
+def squeeze_messages(messages: list[TranscriptionSegment]) -> list[TranscriptionSegment]:
+    if len(messages) <= 1:
+        return messages
+
+    _messages = messages[:]
+    result_messages = []
+    last_message = None
+    while _messages:
+        message = _messages.pop(0)
+        if not last_message:
+            last_message = message
+            continue
+
+        if last_message.speaker == message.speaker:
+            last_message.text = ' '.join([last_message.text, message.text])
+            continue
+        else:
+            result_messages.append(last_message)
+            last_message = message
+            continue
+    result_messages.append(last_message)
+
+    return result_messages

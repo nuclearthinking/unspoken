@@ -56,10 +56,10 @@ services:
               capabilities: [gpu]
     volumes:
       - type: bind
-        source: ./models
+        source: ./resources/models
         target: /app/models
       - type: bind
-        source: /root/.cache/torch/NeMo/NeMo_1.21.0/
+        source: ./resources/models/nemo/
         target: /root/.cache/torch/NeMo/NeMo_1.21.0/
     depends_on:
       - amqp
@@ -97,7 +97,6 @@ services:
       start_period: 10s
     volumes:
       - db:/var/lib/postgresql/data
-      - ./resources/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
   amqp:
     image: rabbitmq:3.9.29-management
     hostname: rabbitmq

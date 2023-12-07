@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Transcriber:
     def __init__(self):
         self._model = WhisperModel(
-            model_size_or_path='large-v2',
+            model_size_or_path='large-v3',
             device=settings.device,
             compute_type=settings.compute_type,
             download_root='models',

@@ -68,7 +68,7 @@ function Tasks() {
       {task.status === "completed" && (
         <div>
           {task.messages.map((message, i) => (
-            <Message key={i} text={message.text} speaker={message.speaker} />
+            <Message key={i} text={message.text} speaker={message.speaker} start={message.start}/>
           ))}
         </div>
       )}
