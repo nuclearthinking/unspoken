@@ -57,7 +57,32 @@ messages with data like timestamps and speaker.
 }
 ```
 
-Current accuracy of STT and Speaker Diarization is still not that good, but still could be good enough for some
-purposes.
+### Build frontend
+UI interface is optional, you can use application with API interface. 
+
+To build UI follow this instruction. 
+
+Required dependencies `nodejs` 
+* How to install node: https://nodejs.org/en/download/package-manager
+
+
+How to build frontend:
+
+I'm using bun javascript package manager
+* How to install bun: https://bun.sh/ 
+
+But it available with any other alternatives such as `npm`, `yarn` and others.
+```bash
+cd frontend/unspoken
+bun install
+bun run build 
+```
+
+Run frontend: 
+```bash
+docker compose --profile frontend up
+```
+
+Current accuracy of STT and Speaker Diarization is still not that good, but could be good enough for some purposes.
 
 based on [faster-whisper](https://github.com/guillaumekln/faster-whisper) and NeMo 

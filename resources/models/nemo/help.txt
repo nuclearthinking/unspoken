@@ -1,1 +1,0 @@
-# File to make necessary folders to be part of git repository

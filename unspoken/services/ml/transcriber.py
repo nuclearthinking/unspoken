@@ -16,7 +16,7 @@ class Transcriber:
             model_size_or_path='large-v3',
             device=settings.device,
             compute_type=settings.compute_type,
-            download_root='models',
+            download_root='resources/models',
         )
 
     def transcribe(self, audio: bytes) -> SpeachToTextResult:

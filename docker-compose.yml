@@ -9,6 +9,8 @@ networks:
 
 services:
   frontend:
+    profiles:
+      - frontend
     image: caddy:2.7.5
     restart: always
     volumes:
@@ -18,6 +20,8 @@ services:
       - type: bind
         source: ./frontend/unspoken/dist
         target: /var/www/app
+    depends_on:
+      - api
     ports:
       - "80:80"
   api:
@@ -53,14 +57,11 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]
+              capabilities: [ gpu ]
     volumes:
       - type: bind
-        source: ./resources/models
-        target: /app/models
-      - type: bind
-        source: ./resources/models/nemo/
-        target: /root/.cache/torch/NeMo/NeMo_1.21.0/
+        source: ./resources/
+        target: /app/resources/
     depends_on:
       - amqp
       - api
