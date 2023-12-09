@@ -1,3 +1,4 @@
+import uuid
 import logging
 
 import magic
@@ -19,10 +20,11 @@ async def upload_audio(file: UploadFile):
     file_type = magic.from_buffer(file_data[:2048], mime=True)
     if not MimeType(file_type).is_supported():
         raise HTTPException(status_code=400, detail=f'File format {file_type} is not supported.')
-    task = db.create_new_task()
-    temp_file = db.save_temp_file(db.TempFile(file_name=file.filename, data=file_data, task_id=task.id))
+    temp_file = db.save_temp_file(db.TempFile(file_name=uuid.uuid4(), file_type=file_type))
+    temp_file.write(file_data)
+    task = db.create_new_task(uploaded_file_name=file.filename)
     logger.info('Publishing convert audio task for temp_file_id %s', temp_file.id)
-    convert_audio.delay(temp_file.id)
+    convert_audio.delay(temp_file_id=temp_file.id, task_id=task.id)
     return UploadResponse(
         task_id=task.id,
         task_status=task.status,

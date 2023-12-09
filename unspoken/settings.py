@@ -31,5 +31,8 @@ class _Settings(BaseSettings):
     low_resource_demand_queue: str = 'low_resource_demand'
     low_resource_demand_routing_key: str = 'low.#'
 
+    # OTHER SETTINGS
+    temp_files_dir: str = 'temp_files'
+
 
 settings = _Settings()

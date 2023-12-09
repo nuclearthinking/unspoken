@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class MimeType(Enum):
+class MimeType(str, Enum):
     m4a = 'audio/x-m4a'
     aac = 'audio/aac'
     mp3 = 'audio/mpeg'

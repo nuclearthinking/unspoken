@@ -13,12 +13,7 @@ def get_task(id_: int):
     task = db.get_task(id_)
     if not task:
         raise HTTPException(status_code=404, detail='Task not found.')
-    result = TaskResponse(
-        id=task.id,
-        status=task.status,
-    )
-    if task.audio:
-        result.file_name = task.audio.file_name
+    result = TaskResponse(id=task.id, status=task.status, file_name=task.uploaded_file_name)
     if task.status != TaskStatus.completed:
         return result
     if not task.transcript:
@@ -46,7 +41,11 @@ def squeeze_messages(messages: list[TranscriptionSegment]) -> list[Transcription
             continue
 
         if last_message.speaker == message.speaker:
-            last_message.text = ' '.join([last_message.text, message.text])
+            if last_message.text.endswith(',') or last_message.text.endswith('.'):
+                connection_symbol = ' '
+            else:
+                connection_symbol = ', '
+            last_message.text = connection_symbol.join([last_message.text, message.text])
             continue
         else:
             result_messages.append(last_message)

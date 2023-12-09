@@ -1,4 +1,5 @@
 import logging
+import datetime
 from operator import itemgetter
 from collections import defaultdict
 
@@ -31,14 +32,21 @@ def complete_transcription(task_id: int) -> None:
     ):
         logger.warning('Task %s is not ready to be processed.', task.id)
         return
-    logger.info('Combining speach to text and diarization results for task %s', task.id)
-    transcription = _combine_results(
-        speach_to_text_result=SpeachToTextResult.parse_obj(task.transcript.speach_to_text_result),
-        diarization_result=DiarizationResult.parse_obj(task.transcript.diarization_result),
-    )
-    db.save_transcription_result(task.id, transcription.dict())
-    db.update_task(task, status=TaskStatus.completed)
-    logger.info('Transcription completed for task %s', task.id)
+    try:
+        logger.info('Combining speach to text and diarization results for task %s', task.id)
+        transcription = _combine_results(
+            speach_to_text_result=SpeachToTextResult.parse_obj(task.transcript.speach_to_text_result),
+            diarization_result=DiarizationResult.parse_obj(task.transcript.diarization_result),
+        )
+        db.save_transcription_result(task.id, transcription.dict())
+        db.update_task(task, status=TaskStatus.completed, updated_at=datetime.datetime.utcnow())
+        logger.info('Transcription completed for task %s', task.id)
+    except Exception:
+        logger.exception('Exception occurred while processing task %s', task.id)
+        db.update_task(task, status=TaskStatus.failed)
+    finally:
+        if task.wav_file:
+            task.wav_file.delete()
 
 
 def _combine_results(

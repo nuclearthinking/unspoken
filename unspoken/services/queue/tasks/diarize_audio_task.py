@@ -28,13 +28,15 @@ def diarize_audio(self, task_id: int):
     if not task:
         logger.warning('Not found task with id: %s.', task_id)
         return
-    if task.audio is None:
+    if task.wav_file is None:
         logger.error('Task with id: %s has no audio, therefore cannot be transcribed.', task_id)
         db.update_task(task, status=TaskStatus.failed)
         return
     diarization_result = None
     try:
-        diarization_result = Diarizer().diarize_audio(task.audio.wav_data)
+        db.update_task(task, status=TaskStatus.diarization)
+        audio_data = task.wav_file.read()
+        diarization_result = Diarizer().diarize_audio(audio_data)
     except torch.cuda.OutOfMemoryError as e:
         logger.exception('Cuda out of memory error occurred for task_id: %s, retrying.', task_id)
         torch.cuda.empty_cache()
@@ -52,6 +54,7 @@ def diarize_audio(self, task_id: int):
         return
     if not diarization_result:
         logger.error('Empty diarization result!')
+        db.update_task(task, status=TaskStatus.failed)
         return
     db.save_diarization_result(task.transcript_id, diarization_result.dict())
     logger.info('Checking is task completed for task_id %s.', task_id)

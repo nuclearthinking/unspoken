@@ -9,7 +9,15 @@ function StatusChip(props) {
     completed: { color: "success" },
     failed: { color: "danger" },
     queued: { color: "default" },
-    processing: {
+    conversion: {
+      color: "secondary",
+      endContent: <Spinner color="secondary" size="sm" />,
+    },
+    diarization: {
+      color: "secondary",
+      endContent: <Spinner color="secondary" size="sm" />,
+    },
+    transcribing: {
       color: "secondary",
       endContent: <Spinner color="secondary" size="sm" />,
     },

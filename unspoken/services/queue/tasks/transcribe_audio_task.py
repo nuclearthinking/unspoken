@@ -28,13 +28,15 @@ def speach_to_text(self, task_id: int):
     if not task:
         logger.warning('Not found task with id: %s', task_id)
         return
-    if task.audio is None:
+    if task.wav_file is None:
         logger.error('Task with id: %s has no audio, therefore cannot be transcribed.', task_id)
         db.update_task(task, status=TaskStatus.failed)
         return
     transcription_result = None
     try:
-        transcription_result = Transcriber().transcribe(task.audio.mp3_data)
+        db.update_task(task, status=TaskStatus.transcribing)
+        audio_data = task.wav_file.read()
+        transcription_result = Transcriber().transcribe(audio_data)
     except RuntimeError as e:
         logger.exception('Transcriber failed for task_id: %s, retrying.', task_id)
         self.retry(exc=e, countdown=5)
