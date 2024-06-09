@@ -15,5 +15,5 @@ class NemoDomainType(str, Enum):
 
     def get_config_path(self) -> Path:
         path = Path.cwd() / 'resources' / 'diarization' / CONFIG_MAP[self.value]
-        assert path.exists()
+        assert path.exists(), f'Path {path} does not exists.'
         return path

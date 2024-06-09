@@ -1,10 +1,4 @@
-version: '3.7'
-
 volumes:
-  db:
-
-networks:
-  rabbitmq:
   db:
 
 services:
@@ -69,6 +63,9 @@ services:
       - type: bind
         source: ./temp_files
         target: /app/temp_files
+      - type: bind
+        source: /root/.cache/torch/NeMo
+        target: /root/.cache/torch/NeMo
     depends_on:
       - amqp
       - api
@@ -101,8 +98,6 @@ services:
       POSTGRES_PASSWORD: "changeme"
     expose:
       - "5432"
-    ports:
-      - "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U unspoken -d unspoken" ]
       interval: 10s
