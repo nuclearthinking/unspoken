@@ -8,7 +8,7 @@ class _Settings(BaseSettings):
     whisper_model: str = 'large-v2'
     device: str = 'cuda'
     device_index: int = 0
-    compute_type: str = 'float8'
+    compute_type: str = 'int8'
 
     # NEMO SETTINGS
     nemo_domain_type: NemoDomainType = NemoDomainType.telephonic
