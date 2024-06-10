@@ -71,7 +71,7 @@ services:
         target: /app/temp_files
       - type: bind
         source: /root/.cache/torch/NeMo
-        target: /app/resources/
+        target: /root/.cache/torch/NeMo
     depends_on:
       - amqp
       - api
