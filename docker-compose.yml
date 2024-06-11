@@ -8,7 +8,7 @@ networks:
   db:
   default:
     external:
-      - name: external_net
+      name: my_custom_network
 
 services:
   frontend:
