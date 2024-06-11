@@ -7,8 +7,8 @@ networks:
   rabbitmq:
   db:
   default:
-    external:
-      name: external_net
+    external: true
+    name: external_net
 
 services:
   frontend:
