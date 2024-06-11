@@ -2,9 +2,8 @@ volumes:
   db:
 
 networks:
-  default:
+  e_net:
     external: true
-
 services:
   frontend:
     profiles:
@@ -74,6 +73,9 @@ services:
       - amqp
       - api
       - db
+    networks:
+      - default
+      - e_net
   worker:
     build: .
     restart: always
