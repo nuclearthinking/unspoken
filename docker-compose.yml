@@ -2,10 +2,7 @@ volumes:
   db:
 
 networks:
-  rabbitmq:
-  db:
-  service:
-    name: service
+  default:
     external: true
 
 services:
@@ -77,10 +74,6 @@ services:
       - amqp
       - api
       - db
-    networks:
-      - service
-      - db
-      - rabbitmq
   worker:
     build: .
     restart: always
