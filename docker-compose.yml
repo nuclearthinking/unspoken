@@ -79,6 +79,8 @@ services:
       - db
     networks:
       - service
+      - db
+      - rabbitmq
   worker:
     build: .
     restart: always
