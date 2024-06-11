@@ -6,6 +6,9 @@ volumes:
 networks:
   rabbitmq:
   db:
+  default:
+    external:
+      - name: external_net
 
 services:
   frontend:
@@ -76,6 +79,8 @@ services:
       - amqp
       - api
       - db
+    networks:
+      - external_net
   worker:
     build: .
     restart: always
