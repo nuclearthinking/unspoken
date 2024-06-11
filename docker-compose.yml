@@ -5,6 +5,7 @@ networks:
   rabbitmq:
   db:
   service:
+    name: service
     external: true
 
 services:
