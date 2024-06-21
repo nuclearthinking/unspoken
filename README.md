@@ -83,6 +83,9 @@ Run frontend:
 docker compose --profile frontend up
 ```
 
+![img_1.png](docs%2Fimg_1.png)
+![img_2.png](docs%2Fimg_2.png)
+
 Current accuracy of STT and Speaker Diarization is still not that good, but could be good enough for some purposes.
 
 based on [faster-whisper](https://github.com/guillaumekln/faster-whisper) and NeMo 
