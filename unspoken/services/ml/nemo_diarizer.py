@@ -9,11 +9,12 @@ from omegaconf import OmegaConf
 from nemo.collections.asr.models import NeuralDiarizer
 
 from unspoken.settings import settings
-from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
+from unspoken.enitites.diarization import DiarizationResult
+from unspoken.services.ml.base_diarizer import BaseDiarizer
 
 
-class Diarizer:
-    def diarize_audio(self, wav_data: bytes) -> DiarizationResult:
+class NemoDiarizer(BaseDiarizer):
+    def diarize(self, wav_data: bytes) -> DiarizationResult:
         torch.cuda.empty_cache()
         diarization_dir = Path.cwd() / 'diarization' / str(uuid.uuid4())
         try:
@@ -51,27 +52,6 @@ class Diarizer:
                 fp,
             )
             fp.write('\n')
-
-    @staticmethod
-    def _parse_rmtt_data(rmtt_data: str) -> DiarizationResult:
-        speakers = set()
-        result = DiarizationResult()
-        for id_, line in enumerate(filter(bool, rmtt_data.splitlines()), start=1):
-            words = list(filter(bool, line.split()))
-            start, duration, speaker = words[3], words[4], words[7]
-            speakers.add(speaker)
-            result.segments.append(
-                SpeakerSegment(
-                    id=id_,
-                    start=float(start),
-                    end=float(start) + float(duration),
-                    speaker=speaker,
-                    duration=duration,
-                )
-            )
-        result.speakers = list(speakers)
-        result.speakers_count = len(speakers)
-        return result
 
     def _generate_config(self, output_dir: Path, source_audio_path: Path):
         config = OmegaConf.load(settings.nemo_domain_type.get_config_path())

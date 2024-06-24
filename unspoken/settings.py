@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 from unspoken.enitites.enums.nemo_type import NemoDomainType
 
@@ -8,7 +8,10 @@ class _Settings(BaseSettings):
     whisper_model: str = 'large-v2'
     device: str = 'cuda'
     device_index: int = 0
-    compute_type: str = 'int8'
+    compute_type: str = 'auto'
+
+    # HUGGINGFACE SETTINGS
+    hf_token: str
 
     # NEMO SETTINGS
     nemo_domain_type: NemoDomainType = NemoDomainType.telephonic

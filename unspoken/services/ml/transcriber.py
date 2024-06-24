@@ -20,10 +20,13 @@ class Transcriber:
         )
 
     def transcribe(self, audio: bytes) -> SpeachToTextResult:
-        segments, info = self._model.transcribe(BytesIO(audio), language='ru')
+        segments, info = self._model.transcribe(
+            BytesIO(audio),
+            language='ru',
+            task='transcribe',
+        )
         result = SpeachToTextResult()
         for segment in segments:
-            logger.info('Segment %s', segment)
             result.segments.append(
                 SpeachToTextSegment(
                     id=segment.id,
@@ -32,8 +35,6 @@ class Transcriber:
                     text=segment.text.strip(),
                 )
             )
-        del self._model
-        torch.cuda.empty_cache()
         return result
 
 

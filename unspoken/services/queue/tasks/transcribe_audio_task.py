@@ -2,7 +2,7 @@ import logging
 import datetime
 from datetime import timezone
 
-import torch
+import torch.cuda
 
 from unspoken.services import db
 from unspoken.settings import settings

@@ -6,9 +6,9 @@ import torch
 
 from unspoken.services import db
 from unspoken.settings import settings
-from unspoken.services.ml.diarizer import Diarizer
 from unspoken.services.queue.broker import celery
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def diarize_audio(self, task_id: int):
     try:
         db.update_task(task, status=TaskStatus.diarization)
         audio_data = task.wav_file.read()
-        diarization_result = Diarizer().diarize_audio(audio_data)
+        diarization_result = PyanoteDiarizer().diarize(audio_data)
     except torch.cuda.OutOfMemoryError as e:
         logger.exception('Cuda out of memory error occurred for task_id: %s, retrying.', task_id)
         torch.cuda.empty_cache()
