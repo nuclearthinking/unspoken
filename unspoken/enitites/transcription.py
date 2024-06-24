@@ -10,5 +10,5 @@ class TranscriptionSegment(BaseModel):
 
 class TranscriptionResult(BaseModel):
     messages: list[TranscriptionSegment] = Field(default_factory=list)
-    file_name: str = None
-    duration: float = None
+    file_name: str | None = None
+    duration: float | None = None

@@ -7,7 +7,7 @@ RUN apt update && \
     apt -y upgrade && \
     apt install -y ffmpeg libavcodec-extra gcc python3-dev libffi-dev python3-pip libmagic-dev libblas3 liblapack3 liblapack-dev libblas-dev
 
-RUN pip install -U pip && pip install poetry && pip install -U Cython && pip install youtokentome==1.0.6
+RUN pip install -U pip && pip install poetry
 
 WORKDIR /app
 

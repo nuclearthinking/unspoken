@@ -24,6 +24,8 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       db_user: "unspoken"
       db_password: "changeme"
@@ -42,6 +44,8 @@ services:
     build: .
     restart: always
     command: celery -A unspoken.services.queue.worker.worker worker -Q high_resource_demand -c 1 --loglevel=INFO
+    env_file:
+      - .env
     environment:
       db_user: "unspoken"
       db_password: "changeme"
@@ -63,9 +67,6 @@ services:
       - type: bind
         source: ./temp_files
         target: /app/temp_files
-      - type: bind
-        source: /root/.cache/torch/NeMo
-        target: /root/.cache/torch/NeMo
     depends_on:
       - amqp
       - api
@@ -74,6 +75,8 @@ services:
     build: .
     restart: always
     command: celery -A unspoken.services.queue.worker.worker worker -Q low_resource_demand -c 10 --loglevel=INFO
+    env_file:
+      - .env
     environment:
       db_user: "unspoken"
       db_password: "changeme"
