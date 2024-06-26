@@ -2,7 +2,7 @@ import logging
 import datetime
 from datetime import timezone
 
-import torch.cuda
+import torch
 
 from unspoken.services import db
 from unspoken.settings import settings
@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
     max_retries=5,
 )
 def speach_to_text(self, task_id: int):
-    torch.cuda.empty_cache()
     logger.info('Transcribing audio for task_id: %s', task_id)
+    torch.cuda.empty_cache()
     task = db.get_task(task_id)
     if not task:
         logger.warning('Not found task with id: %s', task_id)
