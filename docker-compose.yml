@@ -115,6 +115,5 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=unspoken
       - RABBITMQ_DEFAULT_PASS=unspoken
-      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-rabbit consumer_timeout 36000000"
     expose:
       - "5672"
