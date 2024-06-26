@@ -17,10 +17,11 @@ class PyanoteDiarizer(BaseDiarizer):
         ).to(torch.device(f'{settings.device}:{settings.device_index}'))
 
     def diarize(self, wav_data: bytes) -> DiarizationResult:
-        with NamedTemporaryFile(suffix='.rttm') as fp:
+        with NamedTemporaryFile(suffix='.wav') as fp:
             fp.write(wav_data)
             fp.flush()
             diarization = self._pipeline(fp.name)
+
         result = DiarizationResult()
 
         for id_, (segment, _, speaker) in enumerate(diarization.itertracks(yield_label=True)):

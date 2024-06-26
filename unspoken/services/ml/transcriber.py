@@ -1,7 +1,6 @@
 import logging
 from io import BytesIO
 
-import torch
 from faster_whisper import WhisperModel
 
 from unspoken.settings import settings
