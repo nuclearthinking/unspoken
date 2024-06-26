@@ -2,13 +2,22 @@
 
 Convert audio to text-conversation separated by speakers.
 
-Start with this command.
+## Installation
+* You have to have installed nvidia drivers to be able to use this application. 
+* You have to accept pyannote user conditions 
+  * Accept [pyannote/segmentation-3.0](https://hf.co/pyannote/segmentation-3.0) user conditions
+  * Accept [pyannote/speaker-diarization-3.1](https://hf.co/pyannote/speaker-diarization-3.1) user conditions
+  * Create access token at [hf.co/settings/tokens](https://hf.co/settings/tokens).
+* Put access token to .env file HF_TOKEN="your_hf_token"
+* Build and run containers with docker compose.
 
 ```bash
 docker-compose up -d
 ```
 
-Upload file
+## Getting started
+
+Upload file.
 
 ```bash
 curl --location '0.0.0.0:8000/upload/audio' \
@@ -57,7 +66,7 @@ messages with data like timestamps and speaker.
 }
 ```
 
-### Build frontend
+## Build frontend (optional)
 UI interface is optional, you can use application with API interface. 
 
 To build UI follow this instruction. 
@@ -83,9 +92,9 @@ Run frontend:
 docker compose --profile frontend up
 ```
 
-![img_1.png](docs%2Fimg_1.png)
-![img_2.png](docs%2Fimg_2.png)
+![img_1.png](docs/img_1.png)
+![img_2.png](docs/img_2.png)
 
 Current accuracy of STT and Speaker Diarization is still not that good, but could be good enough for some purposes.
 
-based on [faster-whisper](https://github.com/guillaumekln/faster-whisper) and NeMo 
+Based on [faster-whisper](https://github.com/guillaumekln/faster-whisper) and [pyannote-audio](https://github.com/pyannote/pyannote-audio) 
