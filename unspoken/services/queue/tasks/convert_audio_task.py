@@ -1,8 +1,9 @@
 import uuid
 import logging
 
-from unspoken.services import db
 from unspoken.settings import settings
+from unspoken.services.db import api as db
+from unspoken.services.db.models import TempFile
 from unspoken.services.queue.broker import celery
 from unspoken.services.audio.converter import convert_to_wav
 from unspoken.enitites.enums.mime_types import MimeType
@@ -38,7 +39,7 @@ def convert_audio(temp_file_id: int, task_id: int) -> None:
         temp_file_data = temp_file.read()
 
         wav_audio_data = convert_to_wav(temp_file_data)
-        wav_temp_file = db.save_temp_file(db.TempFile(file_name=uuid.uuid4(), file_type=MimeType.wav))
+        wav_temp_file = db.save_temp_file(TempFile(file_name=str(uuid.uuid4()), file_type=MimeType.wav))
         wav_temp_file.write(wav_audio_data)
         logger.info('Saved temp audio %s', wav_temp_file)
         db.update_task(task, wav_file_id=wav_temp_file.id)

@@ -4,8 +4,8 @@ from datetime import timezone
 
 import torch
 
-from unspoken.services import db
 from unspoken.settings import settings
+from unspoken.services.db import api as db
 from unspoken.services.queue.broker import celery
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer

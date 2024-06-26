@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from unspoken.settings import settings
 from unspoken.api.tasks import tasks_router
 from unspoken.api.upload import upload_router
-from unspoken.services.db.base import setup as db_setup
+from unspoken.services.db.models import setup as db_setup
 
 logging.basicConfig(
     level=logging.INFO,

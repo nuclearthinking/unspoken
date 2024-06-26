@@ -3,8 +3,8 @@ import datetime
 from operator import itemgetter
 from collections import defaultdict
 
-from unspoken.services import db
 from unspoken.settings import settings
+from unspoken.services.db import api as db
 from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
 from unspoken.services.queue.broker import celery
 from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
