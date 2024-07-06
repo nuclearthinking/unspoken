@@ -23,15 +23,17 @@ class PyanoteDiarizer(BaseDiarizer):
             diarization = self._pipeline(fp.name)
 
         result = DiarizationResult()
-
+        speakers = set()
         for id_, (segment, _, speaker) in enumerate(diarization.itertracks(yield_label=True)):
+            speakers.add(speaker.lower())
             result.segments.append(
                 SpeakerSegment(
                     id=id_,
-                    start=float(segment.start),
-                    end=float(segment.end),
-                    speaker=speaker,
-                    duration=float(segment.duration),
+                    start=float(round(segment.start, 3)),
+                    end=float(round(segment.end, 3)),
+                    speaker=speaker.lower(),
+                    duration=float(round(segment.duration, 3)),
                 )
             )
+        result.speakers = list(speakers)
         return result
