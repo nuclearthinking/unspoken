@@ -13,14 +13,6 @@ from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
 logger = logging.getLogger(__name__)
 
 
-@celery.task(
-    name='diarize_audio',
-    ignore_result=True,
-    queue=settings.high_resource_demand_queue,
-    routing_key='high.diarize_audio',
-    bind=True,
-    max_retries=5,
-)
 def diarize_audio(self, task_id: int):
     logger.info('Diarizing audio for task_id: %s.', task_id)
     torch.cuda.empty_cache()

@@ -9,5 +9,5 @@ from .base import (
     remove_temp_file,
     save_diarization_result,
     save_transcription_result,
-    save_speach_to_text_result,
+    save_speach_to_text_result
 )

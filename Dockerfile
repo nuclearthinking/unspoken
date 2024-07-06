@@ -14,7 +14,6 @@ WORKDIR /app
 COPY ["pyproject.toml", "poetry.lock", "README.md", "/app/"]
 
 RUN poetry config virtualenvs.create false && \
-    poetry config installer.parallel false && \
     poetry install --only main --no-interaction --no-ansi --no-root
 
 COPY . /app/

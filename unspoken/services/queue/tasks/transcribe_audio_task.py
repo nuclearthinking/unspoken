@@ -13,14 +13,6 @@ from unspoken.enitites.enums.task_status import TaskStatus
 logger = logging.getLogger(__name__)
 
 
-@celery.task(
-    name='speach_to_text',
-    ignore_result=True,
-    queue=settings.high_resource_demand_queue,
-    routing_key='high.speach_to_text',
-    bind=True,
-    max_retries=5,
-)
 def speach_to_text(self, task_id: int):
     logger.info('Transcribing audio for task_id: %s', task_id)
     torch.cuda.empty_cache()
