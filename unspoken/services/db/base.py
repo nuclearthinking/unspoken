@@ -1,15 +1,15 @@
-import os
-import logging
 import datetime
+import logging
+import os
 from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
 
-from unspoken.settings import settings
-from unspoken.exceptions import TranscriptNotFound
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.exceptions import TranscriptNotFound
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -89,12 +89,52 @@ class Task(Base):
         default=TaskStatus.queued,
     )
     uploaded_file_name: Mapped[str] = mapped_column(sa.String(255), nullable=True)
-    wav_file_id: Mapped[int] = mapped_column(sa.ForeignKey(TempFile.id), nullable=True)
-    wav_file: Mapped[TempFile] = relationship(TempFile, foreign_keys=[wav_file_id], lazy='joined')
     transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
     transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
     created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+
+class Speaker(Base):
+    __tablename__ = 'speakers'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    task_id: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+
+
+class Message(Base):
+    __tablename__ = 'messages'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    speaker_id: Mapped[int] = mapped_column(sa.ForeignKey(Speaker.id), nullable=True)
+    speaker: Mapped[Speaker] = relationship(Speaker, foreign_keys=[speaker_id], lazy='joined')
+    task_id: Mapped[int] = mapped_column(sa.ForeignKey(Task.id), nullable=False)
+    task: Mapped[Task] = relationship(Task, foreign_keys=[task_id], lazy='joined')
+    text: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    start_time: Mapped[float] = mapped_column(sa.Float, nullable=False)
+    end_time: Mapped[float] = mapped_column(sa.Float, nullable=False)
+
+
+def create_speaker(name: str, task_id: int, session: Session = None) -> Speaker:
+    session = session or Session()
+    with session:
+        speaker = Speaker(name=name, task_id=task_id)
+        session.add(speaker)
+        session.commit()
+        session.refresh(speaker)
+        return speaker
+
+
+def save_messages(messages: list[Message], session: Session = None) -> None:
+    session = session or Session()
+    with session:
+        [session.add(m) for m in messages]
+        session.commit()
 
 
 def create_new_task(**kwargs) -> Task:
@@ -123,54 +163,58 @@ def get_temp_file(id_: int) -> TempFile | None:
         return s.execute(query).scalar_one_or_none()
 
 
-def remove_temp_file(id_: int) -> None:
-    with Session() as s:
-        query = sa.delete(TempFile).where(TempFile.id == id_)
-        s.execute(query)
-        s.commit()
-        logger.info(f'Removed temp file with id {id_}')
-
-
-def get_task(id_: int) -> Task | None:
+def get_task(id_: int, session: Session = None, detach: bool = False) -> Task | None:
+    session = session or Session()
     query = sa.select(Task).where(Task.id == id_)
-    task = Session.execute(query).scalar_one_or_none()
-    if task is None:
-        return None
-    Session.refresh(task)
-    return task
+    with session:
+        task = session.execute(query).scalar_one_or_none()
+        if task is None:
+            return None
+        session.refresh(task)
+        if detach:
+            session.expunge(task)
+        return task
 
 
-def update_task(task: Task, **kwargs) -> Task:
-    Session.add(task)
-    logger.info('Updating task %s with properties %s', task, kwargs)
-    for key, value in kwargs.items():
-        setattr(task, key, value)
-    Session.commit()
-    return task
+def update_task(task: Task, session: Session = None, **kwargs) -> Task:
+    session = session or Session()
+    with session:
+        session.add(task)
+        logger.debug('Updating task %s with properties %s', task, kwargs)
+        for key, value in kwargs.items():
+            setattr(task, key, value)
+        session.commit()
+        return task
 
 
-def save_speach_to_text_result(id_, result: dict) -> None:
+def save_speach_to_text_result(id_, result: dict, session: Session = None) -> None:
+    session = session or Session()
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = Session.execute(query).scalar_one_or_none()
-    if not transcript:
-        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
-    transcript.speach_to_text_result = result
-    Session.commit()
+    with session:
+        transcript = session.execute(query).scalar_one_or_none()
+        if not transcript:
+            raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+        transcript.speach_to_text_result = result
+        session.commit()
 
 
-def save_diarization_result(id_, result: dict) -> None:
+def save_diarization_result(id_, result: dict, session: Session = None) -> None:
+    session = session or Session()
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = Session.execute(query).scalar_one_or_none()
-    if not transcript:
-        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
-    transcript.diarization_result = result
-    Session.commit()
+    with session:
+        transcript = session.execute(query).scalar_one_or_none()
+        if not transcript:
+            raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+        transcript.diarization_result = result
+        session.commit()
 
 
-def save_transcription_result(id_, result: dict) -> None:
+def save_transcription_result(id_, result: dict, session: Session = None) -> None:
+    session = session or Session()
     query = sa.select(Transcript).where(Transcript.id == id_)
-    transcript = Session.execute(query).scalar_one_or_none()
-    if not transcript:
-        raise TranscriptNotFound(f'Transcript with id {id_} not found.')
-    transcript.transcription_result = result
-    Session.commit()
+    with session:
+        transcript = session.execute(query).scalar_one_or_none()
+        if not transcript:
+            raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+        transcript.transcription_result = result
+        session.commit()
