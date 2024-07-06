@@ -11,12 +11,6 @@ from unspoken.enitites.enums.task_status import TaskStatus
 logger = logging.getLogger(__name__)
 
 
-@celery.task(
-    name='convert_audio',
-    ignore_result=True,
-    queue=settings.low_resource_demand_queue,
-    routing_key='low.convert_audio',
-)
 def convert_audio(temp_file_id: int, task_id: int) -> None:
     logger.info('Converting audio to mp3 for temporary file: %s', temp_file_id)
 
@@ -38,7 +32,7 @@ def convert_audio(temp_file_id: int, task_id: int) -> None:
         temp_file_data = temp_file.read()
 
         wav_audio_data = convert_to_wav(temp_file_data)
-        wav_temp_file = db.save_temp_file(db.TempFile(file_name=uuid.uuid4(), file_type=MimeType.wav))
+        wav_temp_file = db.save_temp_file(db.TempFile(file_name=str(uuid.uuid4()), file_type=MimeType.wav))
         wav_temp_file.write(wav_audio_data)
         logger.info('Saved temp audio %s', wav_temp_file)
         db.update_task(task, wav_file_id=wav_temp_file.id)

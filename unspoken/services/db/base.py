@@ -68,7 +68,11 @@ class TempFile(Base):
             return f.read()
 
     def delete(self) -> None:
+        path = Path(settings.temp_files_dir) / self.file_name
+        logger.info('Deleting file %s', str(path))
         os.remove(Path(settings.temp_files_dir) / self.file_name)
+        if path.exists():
+            logger.warning('File %s still exists after delete', str(path))
         with Session() as s:
             s.delete(self)
             s.commit()

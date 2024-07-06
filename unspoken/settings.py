@@ -29,10 +29,8 @@ class _Settings(BaseSettings):
     rabbitmq_vhost: str = '/'
     rabbitmq_user: str
     rabbitmq_password: str
-    high_resource_demand_queue: str = 'high_resource_demand'
-    high_resource_demand_routing_key: str = 'high.#'
-    low_resource_demand_queue: str = 'low_resource_demand'
-    low_resource_demand_routing_key: str = 'low.#'
+    transcribe_audio_queue: str = 'transcribe_audio'
+    transcribe_audio_routing_key: str = 'transcribe.#'
 
     # OTHER SETTINGS
     temp_files_dir: str = 'temp_files'

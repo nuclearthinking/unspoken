@@ -15,7 +15,4 @@ celery = Celery('unspoken', broker=broker_url)
 celery.conf.update(
     worker_hijack_root_logger=False,
 )
-celery.conf.task_queues = (
-    Queue(settings.high_resource_demand_queue, routing_key='high.#'),
-    Queue(settings.low_resource_demand_queue, routing_key='low.#'),
-)
+celery.conf.task_queues = (Queue(settings.transcribe_audio_queue, routing_key=settings.transcribe_audio_routing_key),)
