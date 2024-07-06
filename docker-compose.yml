@@ -52,6 +52,7 @@
         rabbitmq_user: "unspoken"
         rabbitmq_password: "unspoken"
         rabbitmq_host: amqp
+#        CUDA_VISIBLE_DEVICES: "0"
       deploy:
         resources:
           reservations:
