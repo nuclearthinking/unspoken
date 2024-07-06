@@ -14,7 +14,7 @@ Convert audio to text-conversation separated by speakers.
 
 ## Introduction
 
-UNSPOKEN converts audio files to text conversations, labeled by speakers, using Whisper and NeMo diarization.
+UNSPOKEN converts audio files to text conversations, labeled by speakers, using `faster-whisper` and `pyanote.audio` diarization.
 
 ## Features
 
