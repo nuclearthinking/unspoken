@@ -1,104 +1,98 @@
-  volumes:
-    db:
+volumes:
+  db:
+  tmp:
+    driver: local
 
-  services:
-    frontend:
-      profiles:
-        - frontend
-      build:
-        context: .
-        dockerfile: frontend.Dockerfile
-      restart: always
-      depends_on:
-        - api
-      ports:
-        - "80:80"
-    api:
-      build:
-        context: .
-        dockerfile: api.Dockerfile
-      command: gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
-      restart: always
-      ports:
-        - "8000:8000"
-      env_file:
-        - .env
-      environment:
-        db_user: "unspoken"
-        db_password: "changeme"
-        db_host: db
-        rabbitmq_user: "unspoken"
-        rabbitmq_password: "unspoken"
-        rabbitmq_host: amqp
-      volumes:
-        - type: bind
-          source: ./temp_files
-          target: /app/temp_files
-      depends_on:
-        db:
-          condition: service_healthy
-    worker:
-      build:
-        context: .
-        dockerfile: worker.Dockerfile
-      restart: always
-      command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
-      env_file:
-        - .env
-      environment:
-        db_user: "unspoken"
-        db_password: "changeme"
-        db_host: db
-        rabbitmq_user: "unspoken"
-        rabbitmq_password: "unspoken"
-        rabbitmq_host: amqp
-#        CUDA_VISIBLE_DEVICES: "0"
-      deploy:
-        resources:
-          reservations:
-            devices:
-              - driver: nvidia
-                count: all
-                capabilities: [ gpu ]
-      volumes:
-        - type: bind
-          source: ./resources/
-          target: /app/resources/
-        - type: bind
-          source: ./temp_files
-          target: /app/temp_files
-      depends_on:
-        - amqp
-        - api
-        - db
-    db:
-      image: postgres:16.1-alpine
-      restart: unless-stopped
-      environment:
-        POSTGRES_DB: "unspoken"
-        POSTGRES_USER: "unspoken"
-        POSTGRES_PASSWORD: "changeme"
-      ports:
-        - "5432:5432"
-      expose:
-        - "5432"
-      healthcheck:
-        test: [ "CMD-SHELL", "pg_isready -U unspoken -d unspoken" ]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-        start_period: 10s
-      volumes:
-        - db:/var/lib/postgresql/data
-    amqp:
-      image: rabbitmq:3.9.29-management
-      hostname: rabbitmq
-      environment:
-        - RABBITMQ_DEFAULT_USER=unspoken
-        - RABBITMQ_DEFAULT_PASS=unspoken
-      expose:
-        - "5672"
-        - "15672"
-      ports:
-        - "5672:5672"
-        - "15672:15672"
+services:
+  frontend:
+    profiles:
+      - frontend
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+  api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    command: gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+    volumes:
+      - tmp:/app/temp_files
+    depends_on:
+      db:
+        condition: service_healthy
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    restart: always
+    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
+    env_file:
+      - .env
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+    #        CUDA_VISIBLE_DEVICES: "0"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    volumes:
+      - tmp:/app/temp_files
+      - ./resources/:/app/resources/
+    depends_on:
+      - amqp
+      - api
+      - db
+  db:
+    image: postgres:16.1-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "unspoken"
+      POSTGRES_USER: "unspoken"
+      POSTGRES_PASSWORD: "changeme"
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unspoken -d unspoken" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - db:/var/lib/postgresql/data
+  amqp:
+    image: rabbitmq:3.9.29-management
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=unspoken
+      - RABBITMQ_DEFAULT_PASS=unspoken
+    expose:
+      - "5672"
+      - "15672"

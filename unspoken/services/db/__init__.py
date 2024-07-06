@@ -1,13 +1,17 @@
 from .base import (
+    Session,
     Task,
     TempFile,
+    Speaker,
+    Message,
     get_task,
     update_task,
     get_temp_file,
     save_temp_file,
     create_new_task,
-    remove_temp_file,
     save_diarization_result,
     save_transcription_result,
-    save_speach_to_text_result
+    save_speach_to_text_result,
+    create_speaker,
+    save_messages,
 )
