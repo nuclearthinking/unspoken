@@ -5,10 +5,9 @@ from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
-import os
-from alembic.config import Config
-from alembic import command
 
+from alembic import command
+from alembic.config import Config
 from unspoken.settings import settings
 from unspoken.exceptions import TranscriptNotFound
 from unspoken.enitites.enums.mime_types import MimeType
@@ -17,9 +16,11 @@ from unspoken.enitites.enums.task_status import TaskStatus
 logger = logging.getLogger(__name__)
 
 
-def run_migrations():
-    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), 'alembic.ini'))
+def apply_migrations() -> None:
+    logger.info('Applying migrations.')
+    alembic_cfg = Config(settings.alembic_ini_path)
     command.upgrade(alembic_cfg, 'head')
+    logger.info('Migrations completed.')
 
 
 def get_database_url() -> str:
@@ -47,7 +48,7 @@ Base.query = Session.query_property()
 
 def setup() -> None:
     Base.metadata.create_all(checkfirst=True, bind=engine)
-    run_migrations()
+    apply_migrations()
 
 
 class Transcript(Base):

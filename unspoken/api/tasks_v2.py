@@ -12,7 +12,7 @@ tasks_router = APIRouter(
 )
 
 
-@tasks_router.get('/{task_id}/')
+@tasks_router.get('/{task_id:int}/')
 def get_task_messages(task_id: int) -> TaskResponseV2:
     task = db.get_task(task_id)
     if not task:

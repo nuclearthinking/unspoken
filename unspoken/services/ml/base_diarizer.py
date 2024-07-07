@@ -1,12 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
+from unspoken.core.singleton import SingletonABCMeta
 from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
 
 
-class BaseDiarizer(ABC):
-    def __init__(self):
-        pass
-
+class BaseDiarizer(metaclass=SingletonABCMeta):
     @abstractmethod
     def diarize(self, wav_data: bytes) -> DiarizationResult:
         raise NotImplementedError

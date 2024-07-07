@@ -4,16 +4,18 @@ from io import BytesIO
 from faster_whisper import WhisperModel
 
 from unspoken.settings import settings
+from unspoken.core.singleton import SingletonMeta
 from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 
 logger = logging.getLogger(__name__)
 
 
-class Transcriber:
+class Transcriber(metaclass=SingletonMeta):
     def __init__(self):
         self._model = WhisperModel(
-            model_size_or_path='large-v3',
+            model_size_or_path=settings.whisper_model,
             device=settings.device,
+            device_index=settings.device_index,
             compute_type=settings.compute_type,
             download_root='resources/models',
         )
@@ -35,13 +37,3 @@ class Transcriber:
                 )
             )
         return result
-
-
-class TranscriberFactory:
-    __transcriber = None
-
-    @staticmethod
-    def get_transcriber() -> Transcriber:
-        if TranscriberFactory.__transcriber is None:
-            TranscriberFactory.__transcriber = Transcriber()
-        return TranscriberFactory.__transcriber

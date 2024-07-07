@@ -1,20 +1,15 @@
 from pydantic_settings import BaseSettings
 
-from unspoken.enitites.enums.nemo_type import NemoDomainType
-
 
 class _Settings(BaseSettings):
     # WHISPER SETTINGS
-    whisper_model: str = 'large-v2'
+    whisper_model: str = 'large-v3'
     device: str = 'cuda'
     device_index: int = 0
     compute_type: str = 'auto'
 
     # HUGGINGFACE SETTINGS
     hf_token: str
-
-    # NEMO SETTINGS
-    nemo_domain_type: NemoDomainType = NemoDomainType.telephonic
 
     # DB SETTINGS
     db_host: str = '0.0.0.0'
@@ -34,6 +29,7 @@ class _Settings(BaseSettings):
 
     # OTHER SETTINGS
     temp_files_dir: str = 'temp_files'
+    alembic_ini_path: str = 'alembic.ini'
 
 
 settings = _Settings()
