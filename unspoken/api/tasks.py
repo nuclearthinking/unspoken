@@ -5,12 +5,15 @@ from unspoken.enitites.api.tasks import TaskResponse
 from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.enitites.enums.task_status import TaskStatus
 
-tasks_router = APIRouter(prefix='/task')
+tasks_router = APIRouter(
+    prefix='/task',
+    tags=['Tasks'],
+)
 
 
-@tasks_router.get('/{id_}/')
-def get_task(id_: int):
-    task = db.get_task(id_)
+@tasks_router.get('/{task_id}/')
+def get_task(task_id: int) -> TaskResponse:
+    task = db.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail='Task not found.')
     result = TaskResponse(id=task.id, status=task.status, file_name=task.uploaded_file_name)

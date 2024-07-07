@@ -3,15 +3,15 @@ import logging
 import torch
 
 from unspoken import exceptions
-from unspoken.enitites.diarization import DiarizationResult
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.enitites.speach_to_text import SpeachToTextResult
-from unspoken.enitites.transcription import TranscriptionResult
 from unspoken.services import db
-from unspoken.services.annotation.annotate_transcription import annotate
-from unspoken.services.audio.converter import convert_to_wav
-from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
+from unspoken.enitites.diarization import DiarizationResult
+from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.enitites.speach_to_text import SpeachToTextResult
 from unspoken.services.ml.transcriber import Transcriber
+from unspoken.services.audio.converter import convert_to_wav
+from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
+from unspoken.services.annotation.annotate_transcription import annotate
 
 logger = logging.getLogger(__name__)
 
@@ -36,17 +36,17 @@ def _diarize_audio(wav_data: bytes) -> DiarizationResult:
 
 
 def annotate_transcription(
-        stt_result: SpeachToTextResult,
-        diarization_result: DiarizationResult,
+    stt_result: SpeachToTextResult,
+    diarization_result: DiarizationResult,
 ) -> TranscriptionResult:
     return annotate(stt_result, diarization_result)
 
 
 def _save_to_database(
-        task_id: int,
-        annotated_transcription: TranscriptionResult,
-        diarization_result: DiarizationResult,
-        transcription_result: SpeachToTextResult,
+    task_id: int,
+    annotated_transcription: TranscriptionResult,
+    diarization_result: DiarizationResult,
+    transcription_result: SpeachToTextResult,
 ) -> None:
     with db.Session() as session:
         task = db.get_task(task_id, session)

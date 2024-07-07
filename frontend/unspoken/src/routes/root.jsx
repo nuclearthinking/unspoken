@@ -109,7 +109,7 @@ function Root() {
   return (
     <DndProvider backend={HTML5Backend}>
       <Uploady
-        destination={{ url: import.meta.env.VITE_API_URL + "/upload/audio" }}
+        destination={{ url: import.meta.env.VITE_API_URL + "/upload/media" }}
       >
         <DropZone />
         <UploadProgress />
