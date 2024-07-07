@@ -4,9 +4,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from unspoken.api import tasks_router, upload_router, messages_router, speakers_router, tasks_router_v2
 from unspoken.settings import settings
-from unspoken.api.tasks import tasks_router
-from unspoken.api.upload import upload_router
 from unspoken.services.db.base import setup as db_setup
 
 logging.basicConfig(
@@ -14,9 +13,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger('uvicorn')
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=True, title='Unspoken')
+
 app.include_router(tasks_router)
 app.include_router(upload_router)
+app.include_router(tasks_router_v2)
+app.include_router(messages_router)
+app.include_router(speakers_router)
 
 app.add_middleware(
     CORSMiddleware,

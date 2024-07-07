@@ -10,13 +10,16 @@ from unspoken.enitites.api.upload import UploadResponse
 from unspoken.services.queue.broker import celery
 from unspoken.enitites.enums.mime_types import MimeType
 
-upload_router = APIRouter(prefix='/upload')
+upload_router = APIRouter(
+    prefix='/upload',
+    tags=['Upload'],
+)
 
 logger = logging.getLogger(__name__)
 
 
-@upload_router.post('/audio', response_model=UploadResponse)
-async def upload_audio(file: UploadFile):
+@upload_router.post('/media')
+async def upload_audio(file: UploadFile) -> UploadResponse:
     file_data = await file.read()
     file_type = magic.from_buffer(file_data[:2048], mime=True)
     if not MimeType(file_type).is_supported():

@@ -1,15 +1,15 @@
-import datetime
-import logging
 import os
+import logging
+import datetime
 from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
 
+from unspoken.settings import settings
+from unspoken.exceptions import TranscriptNotFound
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.exceptions import TranscriptNotFound
-from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -218,3 +218,63 @@ def save_transcription_result(id_, result: dict, session: Session = None) -> Non
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
         transcript.transcription_result = result
         session.commit()
+
+
+def get_message(id_: int, session: Session = None) -> Message | None:
+    session = session or Session()
+    query = sa.select(Message).where(Message.id == id_)
+    with session:
+        message = session.execute(query).scalar_one_or_none()
+        if message is None:
+            return None
+        return message
+
+
+def get_speaker(id_: int, session: Session = None) -> Speaker | None:
+    session = session or Session()
+    query = sa.select(Speaker).where(Speaker.id == id_)
+    with session:
+        speaker = session.execute(query).scalar_one_or_none()
+        if speaker is None:
+            return None
+        return speaker
+
+
+def update_speaker(speaker: Speaker, session: Session = None, **kwargs) -> Speaker:
+    session = session or Session()
+    with session:
+        session.add(speaker)
+        logger.debug('Updating speaker %s with properties %s', speaker, kwargs)
+        for key, value in kwargs.items():
+            setattr(speaker, key, value)
+        session.commit()
+        session.refresh(speaker)
+        return speaker
+
+
+def get_task_speakers(task_id, session: Session = None) -> list[Speaker]:
+    session = session or Session()
+    query = sa.select(Speaker).where(Speaker.task_id == task_id)
+    with session:
+        speakers = session.execute(query).scalars().all()
+        return list(speakers)
+
+
+def update_message(message: Message, session: Session = None, **kwargs) -> Message:
+    session = session or Session()
+    with session:
+        session.add(message)
+        logger.debug('Updating message %s with properties %s', message, kwargs)
+        for key, value in kwargs.items():
+            setattr(message, key, value)
+        session.commit()
+        session.refresh(message)
+        return message
+
+
+def get_task_messages(task_id, session: Session = None) -> list[Message]:
+    session = session or Session()
+    query = sa.select(Message).where(Message.task_id == task_id)
+    with session:
+        messages = session.execute(query).scalars().all()
+        return list(messages)
