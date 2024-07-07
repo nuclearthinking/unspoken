@@ -1,2 +1,2 @@
-models
-unspoken.db
+.env
+resources/models/*
