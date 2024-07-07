@@ -1,0 +1,535 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Unspoken",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/task/{task_id}/": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Get Task",
+                "operationId": "get_task_task__task_id___get",
+                "parameters": [
+                    {
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Task Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/upload/media": {
+            "post": {
+                "tags": [
+                    "Upload"
+                ],
+                "summary": "Upload Audio",
+                "operationId": "upload_audio_upload_media_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_upload_audio_upload_media_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/{task_id}/": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Get Task Messages",
+                "operationId": "get_task_messages_tasks__task_id___get",
+                "parameters": [
+                    {
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Task Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskResponseV2"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/{message_id}/speaker": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Update Message Speaker",
+                "operationId": "update_message_speaker_messages__message_id__speaker_patch",
+                "parameters": [
+                    {
+                        "name": "message_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Message Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMessageSpeakerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/speakers/{speaker_id}/name": {
+            "patch": {
+                "tags": [
+                    "Speakers"
+                ],
+                "summary": "Update Speaker Name",
+                "operationId": "update_speaker_name_speakers__speaker_id__name_patch",
+                "parameters": [
+                    {
+                        "name": "speaker_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Speaker Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateSpeakerNameRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SpeakerResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Body_upload_audio_upload_media_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "title": "File"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file"
+                ],
+                "title": "Body_upload_audio_upload_media_post"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "MessageResponse": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "Text"
+                    },
+                    "start_time": {
+                        "type": "number",
+                        "title": "Start Time"
+                    },
+                    "end_time": {
+                        "type": "number",
+                        "title": "End Time"
+                    },
+                    "task_id": {
+                        "type": "integer",
+                        "title": "Task Id"
+                    },
+                    "speaker_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Speaker Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "text",
+                    "start_time",
+                    "end_time",
+                    "task_id"
+                ],
+                "title": "MessageResponse"
+            },
+            "SpeakerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "task_id": {
+                        "type": "integer",
+                        "title": "Task Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "task_id"
+                ],
+                "title": "SpeakerResponse"
+            },
+            "TaskResponse": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/TaskStatus"
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "title": "File Name"
+                    },
+                    "speakers": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Speakers"
+                    },
+                    "messages": {
+                        "items": {
+                            "$ref": "#/components/schemas/TranscriptionSegment"
+                        },
+                        "type": "array",
+                        "title": "Messages"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "status"
+                ],
+                "title": "TaskResponse"
+            },
+            "TaskResponseV2": {
+                "properties": {
+                    "messages": {
+                        "items": {
+                            "$ref": "#/components/schemas/MessageResponse"
+                        },
+                        "type": "array",
+                        "title": "Messages"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/TaskStatus"
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "title": "File Name"
+                    },
+                    "speakers": {
+                        "items": {
+                            "$ref": "#/components/schemas/SpeakerResponse"
+                        },
+                        "type": "array",
+                        "title": "Speakers"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "status",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "TaskResponseV2"
+            },
+            "TaskStatus": {
+                "type": "string",
+                "enum": [
+                    "queued",
+                    "conversion",
+                    "diarization",
+                    "transcribing",
+                    "completed",
+                    "failed",
+                    "None"
+                ],
+                "title": "TaskStatus"
+            },
+            "TranscriptionSegment": {
+                "properties": {
+                    "start": {
+                        "type": "number",
+                        "title": "Start"
+                    },
+                    "end": {
+                        "type": "number",
+                        "title": "End"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "Text"
+                    },
+                    "speaker": {
+                        "type": "string",
+                        "title": "Speaker"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "start",
+                    "end",
+                    "text",
+                    "speaker"
+                ],
+                "title": "TranscriptionSegment"
+            },
+            "UpdateMessageSpeakerRequest": {
+                "properties": {
+                    "speaker_id": {
+                        "type": "integer",
+                        "title": "Speaker Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "speaker_id"
+                ],
+                "title": "UpdateMessageSpeakerRequest"
+            },
+            "UpdateSpeakerNameRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "UpdateSpeakerNameRequest"
+            },
+            "UploadResponse": {
+                "properties": {
+                    "task_id": {
+                        "type": "integer",
+                        "title": "Task Id"
+                    },
+                    "task_status": {
+                        "$ref": "#/components/schemas/TaskStatus"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "task_id",
+                    "task_status"
+                ],
+                "title": "UploadResponse"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
