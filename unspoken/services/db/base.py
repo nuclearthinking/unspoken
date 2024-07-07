@@ -5,6 +5,9 @@ from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
+import os
+from alembic.config import Config
+from alembic import command
 
 from unspoken.settings import settings
 from unspoken.exceptions import TranscriptNotFound
@@ -13,14 +16,24 @@ from unspoken.enitites.enums.task_status import TaskStatus
 
 logger = logging.getLogger(__name__)
 
-engine = sa.create_engine(
-    'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}'.format(
+
+def run_migrations():
+    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), 'alembic.ini'))
+    command.upgrade(alembic_cfg, 'head')
+
+
+def get_database_url() -> str:
+    return 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}'.format(
         user=settings.db_user,
         password=settings.db_password,
         host=settings.db_host,
         port=settings.db_port,
         db_name=settings.db_name,
-    ),
+    )
+
+
+engine = sa.create_engine(
+    get_database_url(),
     echo=False,
     pool_pre_ping=True,
     pool_size=10,
@@ -34,6 +47,7 @@ Base.query = Session.query_property()
 
 def setup() -> None:
     Base.metadata.create_all(checkfirst=True, bind=engine)
+    run_migrations()
 
 
 class Transcript(Base):
