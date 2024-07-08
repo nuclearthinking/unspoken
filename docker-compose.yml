@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: frontend.Dockerfile
+    environment:
+      VITE_API_URL: "http://172.24.8.98:8000"
     restart: always
     depends_on:
       - api
@@ -48,14 +50,109 @@ services:
       rabbitmq_user: "unspoken"
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
-    # CUDA_VISIBLE_DEVICES: "0"
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
+              device_ids: ["0"]
+              capabilities: [gpu]
+    volumes:
+      - tmp_files_volume:/app/temp_files
+      - models_volume:/app/resources
+    depends_on:
+      - amqp
+      - api
+      - db
+  worker-2:
+    profiles:
+      - extra
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    restart: always
+    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
+    env_file:
+      - .env
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+      device_index: 0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+    volumes:
+      - tmp_files_volume:/app/temp_files
+      - models_volume:/app/resources
+    depends_on:
+      - amqp
+      - api
+      - db
+  worker-3:
+    profiles:
+      - extra
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    restart: always
+    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
+    env_file:
+      - .env
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+      device_index: 1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [gpu]
+    volumes:
+      - tmp_files_volume:/app/temp_files
+      - models_volume:/app/resources
+    depends_on:
+      - amqp
+      - api
+      - db
+  worker-4:
+    profiles:
+      - extra
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    restart: always
+    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
+    env_file:
+      - .env
+    environment:
+      db_user: "unspoken"
+      db_password: "changeme"
+      db_host: db
+      rabbitmq_user: "unspoken"
+      rabbitmq_password: "unspoken"
+      rabbitmq_host: amqp
+      device_index: 1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [gpu]
     volumes:
       - tmp_files_volume:/app/temp_files
       - models_volume:/app/resources
@@ -72,8 +169,6 @@ services:
       POSTGRES_PASSWORD: "changeme"
     ports:
       - "5432:5432"
-    expose:
-      - "5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U unspoken -d unspoken" ]
       interval: 10s
