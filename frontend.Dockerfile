@@ -8,6 +8,9 @@ RUN npm install
 
 COPY frontend/unspoken .
 
+ARG VITE_API_HOST
+ENV VITE_API_HOST=${VITE_API_HOST}
+
 RUN npm run build
 
 FROM caddy:2.7.5
