@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: frontend.Dockerfile
-    environment:
-      VITE_API_URL: "http://172.24.8.98:8000"
+      args:
+        VITE_API_HOST: ${VITE_API_HOST:-0.0.0.0}
     restart: always
     depends_on:
       - api
@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: api.Dockerfile
-    command: gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
+    command: gunicorn unspoken.app:app -w 4 -b :8000 -k uvicorn.workers.UvicornWorker
     restart: always
     ports:
       - "8000:8000"
@@ -39,7 +39,7 @@ services:
     build:
       context: .
       dockerfile: worker.Dockerfile
-    restart: always
+    restart: unless-stopped
     command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
     env_file:
       - .env
@@ -70,7 +70,7 @@ services:
     build:
       context: .
       dockerfile: worker.Dockerfile
-    restart: always
+    restart: unless-stopped
     command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
     env_file:
       - .env
@@ -102,7 +102,7 @@ services:
     build:
       context: .
       dockerfile: worker.Dockerfile
-    restart: always
+    restart: unless-stopped
     command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
     env_file:
       - .env
@@ -134,7 +134,7 @@ services:
     build:
       context: .
       dockerfile: worker.Dockerfile
-    restart: always
+    restart: unless-stopped
     command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
     env_file:
       - .env
@@ -183,6 +183,11 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=unspoken
       - RABBITMQ_DEFAULT_PASS=unspoken
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 volumes:
   db:
   tmp_files_volume:

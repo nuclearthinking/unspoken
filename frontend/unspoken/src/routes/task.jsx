@@ -9,6 +9,7 @@ import { Chip, Spacer, Spinner } from "@nextui-org/react";
 import StatusChip from "../components/status";
 import Message from "../components/message";
 import "../index.css";
+import { getBackendUrl } from "../common";
 
 function Tasks() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ function Tasks() {
   useEffect(() => {
     const fetchData = async (id) => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/task/${id}/`
+        `${getBackendUrl()}/task/${id}/`
       );
       return await response.json();
     };
@@ -68,7 +69,7 @@ function Tasks() {
       {task.status === "completed" && (
         <div>
           {task.messages.map((message, i) => (
-            <Message key={i} text={message.text} speaker={message.speaker} start={message.start}/>
+            <Message key={i} text={message.text} speaker={message.speaker} start={message.start} />
           ))}
         </div>
       )}

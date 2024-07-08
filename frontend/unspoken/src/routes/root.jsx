@@ -10,6 +10,7 @@ import {
 import { Line } from "rc-progress";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
+import { getBackendUrl } from "../common";
 
 const UploadProgress = () => {
   const [uploads, setUploads] = React.useState({});
@@ -105,11 +106,12 @@ const DropZone = () => {
   );
 };
 
+
 function Root() {
   return (
     <DndProvider backend={HTML5Backend}>
       <Uploady
-        destination={{ url: import.meta.env.VITE_API_URL + "/upload/media" }}
+        destination={{ url: getBackendUrl() + "/upload/media" }}
       >
         <DropZone />
         <UploadProgress />
