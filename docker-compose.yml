@@ -1,8 +1,3 @@
-volumes:
-  db:
-  tmp:
-    driver: local
-
 services:
   frontend:
     profiles:
@@ -34,7 +29,7 @@ services:
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
     volumes:
-      - tmp:/app/temp_files
+      - tmp_files_volume:/app/temp_files
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +48,7 @@ services:
       rabbitmq_user: "unspoken"
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
-    #        CUDA_VISIBLE_DEVICES: "0"
+    # CUDA_VISIBLE_DEVICES: "0"
     deploy:
       resources:
         reservations:
@@ -62,8 +57,8 @@ services:
               count: all
               capabilities: [ gpu ]
     volumes:
-      - tmp:/app/temp_files
-      - ./resources/:/app/resources/
+      - tmp_files_volume:/app/temp_files
+      - models_volume:/app/resources
     depends_on:
       - amqp
       - api
@@ -93,6 +88,7 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=unspoken
       - RABBITMQ_DEFAULT_PASS=unspoken
-    expose:
-      - "5672"
-      - "15672"
+volumes:
+  db:
+  tmp_files_volume:
+  models_volume:
