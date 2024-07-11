@@ -50,37 +50,6 @@ services:
       rabbitmq_user: "unspoken"
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    volumes:
-      - tmp_files_volume:/app/temp_files
-      - models_volume:/app/resources
-    depends_on:
-      - amqp
-      - api
-      - db
-  worker-2:
-    profiles:
-      - extra
-    build:
-      context: .
-      dockerfile: worker.Dockerfile
-    restart: unless-stopped
-    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
-    env_file:
-      - .env
-    environment:
-      db_user: "unspoken"
-      db_password: "changeme"
-      db_host: db
-      rabbitmq_user: "unspoken"
-      rabbitmq_password: "unspoken"
-      rabbitmq_host: amqp
       device_index: 0
     deploy:
       resources:
@@ -96,39 +65,7 @@ services:
       - amqp
       - api
       - db
-  worker-3:
-    profiles:
-      - extra
-    build:
-      context: .
-      dockerfile: worker.Dockerfile
-    restart: unless-stopped
-    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
-    env_file:
-      - .env
-    environment:
-      db_user: "unspoken"
-      db_password: "changeme"
-      db_host: db
-      rabbitmq_user: "unspoken"
-      rabbitmq_password: "unspoken"
-      rabbitmq_host: amqp
-      device_index: 1
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    volumes:
-      - tmp_files_volume:/app/temp_files
-      - models_volume:/app/resources
-    depends_on:
-      - amqp
-      - api
-      - db
-  worker-4:
+  worker-1:
     profiles:
       - extra
     build:
