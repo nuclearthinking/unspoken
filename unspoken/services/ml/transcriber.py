@@ -1,16 +1,16 @@
 import logging
 from io import BytesIO
+from abc import ABC
 
 from faster_whisper import WhisperModel
 
 from unspoken.settings import settings
-from unspoken.core.singleton import SingletonMeta
 from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 
 logger = logging.getLogger(__name__)
 
 
-class Transcriber(metaclass=SingletonMeta):
+class Transcriber:
     def __init__(self):
         self._model = WhisperModel(
             model_size_or_path=settings.whisper_model,

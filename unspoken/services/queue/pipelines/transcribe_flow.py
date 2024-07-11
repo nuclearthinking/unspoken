@@ -16,22 +16,34 @@ from unspoken.services.annotation.annotate_transcription import annotate
 logger = logging.getLogger(__name__)
 
 
+def clear_cuda_cache(func):
+    def wrapper(*args, **kwargs):
+        torch.cuda.empty_cache()
+
+        result = func(*args, **kwargs)
+
+        torch.cuda.synchronize()
+        torch.cuda.empty_cache()
+
+        return result
+
+    return wrapper
+
+
 def _convert_audio(source_file_data: bytes):
     wav_data = convert_to_wav(source_file_data)
     return wav_data
 
 
+@clear_cuda_cache
 def _transcribe_audio(wav_data: bytes) -> SpeachToTextResult:
-    torch.cuda.empty_cache()
     result = Transcriber().transcribe(wav_data)
-    torch.cuda.synchronize()
     return result
 
 
+@clear_cuda_cache
 def _diarize_audio(wav_data: bytes) -> DiarizationResult:
-    torch.cuda.empty_cache()
     result = PyanoteDiarizer().diarize(wav_data)
-    torch.cuda.synchronize()
     return result
 
 
