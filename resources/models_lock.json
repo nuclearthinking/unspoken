@@ -1,0 +1,10 @@
+{
+  "large-v3": {
+    "repo_id": "Systran/faster-whisper-large-v3",
+    "revision": "edaa852ec7e145841d8ffdb056a99866b5f0a478"
+  },
+  "diarization": {
+    "repo_id": "arminhaberl/diarize",
+    "revision": "70180675a7e49a2d26bd3eaff33b969250cad8dc"
+  }
+}

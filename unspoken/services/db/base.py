@@ -42,7 +42,14 @@ engine = sa.create_engine(
     pool_timeout=30,
 )
 Session = scoped_session(sessionmaker(autocommit=False, bind=engine))
-Base = declarative_base()
+
+
+class Base:
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+
+Base = declarative_base(cls=Base)
 Base.query = Session.query_property()
 
 
@@ -106,16 +113,12 @@ class Task(Base):
     uploaded_file_name: Mapped[str] = mapped_column(sa.String(255), nullable=True)
     transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
     transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
 
 class Speaker(Base):
     __tablename__ = 'speakers'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     task_id: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
@@ -124,8 +127,6 @@ class Message(Base):
     __tablename__ = 'messages'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     speaker_id: Mapped[int] = mapped_column(sa.ForeignKey(Speaker.id), nullable=True)
     speaker: Mapped[Speaker] = relationship(Speaker, foreign_keys=[speaker_id], lazy='joined')
     task_id: Mapped[int] = mapped_column(sa.ForeignKey(Task.id), nullable=False)
@@ -133,6 +134,24 @@ class Message(Base):
     text: Mapped[str] = mapped_column(sa.Text, nullable=False)
     start_time: Mapped[float] = mapped_column(sa.Float, nullable=False)
     end_time: Mapped[float] = mapped_column(sa.Float, nullable=False)
+
+
+class LabelingTask(Base):
+    __tablename__ = 'labeling_tasks'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
+    text: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    is_completed: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+
+
+class LabelingResult(Base):
+    __tablename__ = 'labeling_result'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    labeling_task_id: Mapped[int] = mapped_column(sa.ForeignKey(LabelingTask.id), nullable=False)
+    labeling_task: Mapped[LabelingTask] = relationship(LabelingTask, foreign_keys=[labeling_task_id], lazy='joined')
+    text: Mapped[str] = mapped_column(sa.Text, nullable=False)
 
 
 def create_speaker(name: str, task_id: int, session: Session = None) -> Speaker:

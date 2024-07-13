@@ -60,7 +60,7 @@ services:
               capabilities: [gpu]
     volumes:
       - tmp_files_volume:/app/temp_files
-      - models_volume:/app/resources
+      - models_volume:/app/resources/models
     depends_on:
       - amqp
       - api

@@ -14,7 +14,8 @@ Convert audio to text-conversation separated by speakers.
 
 ## Introduction
 
-UNSPOKEN converts audio files to text conversations, labeled by speakers, using `faster-whisper` and `pyanote.audio` diarization.
+UNSPOKEN converts audio files to text conversations, labeled by speakers, using `faster-whisper` and `pyanote.audio`
+diarization.
 
 ## Features
 
@@ -24,33 +25,23 @@ UNSPOKEN converts audio files to text conversations, labeled by speakers, using 
 
 ## Prerequisites
 
-- NVIDIA drivers
-- Accept [pyannote user conditions 1](https://hf.co/pyannote/segmentation-3.0)
-- Accept [pyannote user conditions 2](https://hf.co/pyannote/speaker-diarization-3.1)
-- Create an access token at [Hugging Face](https://hf.co/settings/tokens)
+- NVIDIA drivers installed
 
 ## Installation
 
-1. Clone the repository:
+1. Clone repository:
     ```bash
     git clone https://github.com/nuclearthinking/unspoken.git
     cd unspoken
     ```
-2. Add your Hugging Face token to `.env`:
-    ```env
-    HF_TOKEN="your_hf_token"
-    ```
-3. Build and run containers with Docker Compose:
+2. Build and run application with script:
     ```bash
-    docker compose up -d
+    chmod +x deploy.sh # make file executable
+    ./deploy.sh 
     ```
 
-   *Optionally run UI*
-   ```bash
-   docker compose  --profile frontend up -d
-   ```
-   ![img_1.png](docs/img_1.png)
-   ![img_2.png](docs/img_2.png)
+![img_1.png](docs/img_1.png)
+![img_2.png](docs/img_2.png)
 
 ## Usage
 

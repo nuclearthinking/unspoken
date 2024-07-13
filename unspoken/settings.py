@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings
 
 class _Settings(BaseSettings):
     # WHISPER SETTINGS
-    whisper_model: str = 'large-v3'
     device: str = 'cuda'
     device_index: int = 0
     compute_type: str = 'auto'
@@ -30,6 +29,8 @@ class _Settings(BaseSettings):
     # OTHER SETTINGS
     temp_files_dir: str = 'temp_files'
     alembic_ini_path: str = 'alembic.ini'
+    models_dir_path: str = 'resources/models'
+    models_lock_path: str = 'resources/models_lock.json'
 
 
 settings = _Settings()

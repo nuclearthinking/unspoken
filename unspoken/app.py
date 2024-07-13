@@ -15,20 +15,20 @@ logger = logging.getLogger('uvicorn')
 
 app = FastAPI(debug=True, title='Unspoken')
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=['*'],
+    expose_headers=['*'],
+    allow_credentials=True,
+)
+
 app.include_router(tasks_router)
 app.include_router(upload_router)
 app.include_router(tasks_router_v2)
 app.include_router(messages_router)
 app.include_router(speakers_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
-    expose_headers=['*'],
-)
 
 
 def _init_temp_file_dir():
