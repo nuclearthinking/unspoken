@@ -30,6 +30,7 @@ uvicorn = "^0.30.1"
 python-multipart = "^0.0.9"
 python-magic = "^0.4.27"
 apscheduler = "^3.10.4"
+gradio = "^4.38.1"
 
 
 [tool.poetry.group.dev.dependencies]

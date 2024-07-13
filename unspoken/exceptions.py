@@ -16,3 +16,7 @@ class TempFileNotFoundError(UnspokenException):
 
 class TaskNotFoundError(UnspokenException):
     """Raised when a task cannot be found."""
+
+
+class ModelNotFound(UnspokenException):
+    """Raises when unable to find model info."""

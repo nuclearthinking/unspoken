@@ -1,6 +1,7 @@
-resources/models
 unspoken.db
 .venv
 .idea
 .ruff_cache
 temp_files
+resources/models/*
+deploy.sh
