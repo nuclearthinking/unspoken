@@ -8,6 +8,8 @@ services:
       args:
         VITE_API_HOST: ${VITE_API_HOST:-0.0.0.0}
     restart: always
+    networks:
+      - unspoken_network
     depends_on:
       - api
     ports:
@@ -32,6 +34,8 @@ services:
       rabbitmq_host: amqp
     volumes:
       - tmp_files_volume:/app/temp_files
+    networks:
+      - unspoken_network
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +65,8 @@ services:
     volumes:
       - tmp_files_volume:/app/temp_files
       - models_volume:/app/resources/models
+    networks:
+      - unspoken_network
     depends_on:
       - amqp
       - api
@@ -93,6 +99,8 @@ services:
     volumes:
       - tmp_files_volume:/app/temp_files
       - models_volume:/app/resources
+    networks:
+      - unspoken_network
     depends_on:
       - amqp
       - api
@@ -114,6 +122,8 @@ services:
       start_period: 10s
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+      - unspoken_network
   amqp:
     image: rabbitmq:3.9.29-management
     hostname: rabbitmq
@@ -125,7 +135,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - unspoken_network
 volumes:
   db:
   tmp_files_volume:
   models_volume:
+networks:
+  unspoken_network:
+    name: unspoken
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.80.0.0/16
