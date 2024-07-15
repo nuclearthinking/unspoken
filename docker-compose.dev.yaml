@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      target: development
+    command: uvicorn unspoken.app:app --reload --host 0.0.0.0 --port 8000
+    develop:
+      watch:
+        - path: ./unspoken
+          target: /app/unspoken
+        - path: poetry.lock
+          action: rebuild
+  worker:
+    build:
+      target: development
+    develop:
+      watch:
+        - path: ./unspoken
+          target: /app/unspoken
+        - path: poetry.lock
+          action: rebuild

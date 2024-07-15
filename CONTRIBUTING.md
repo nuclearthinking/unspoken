@@ -12,14 +12,13 @@ cd frontend/unspoken
 bun/npm/yarn install
 bun/npm/yarn run dev
 ```
-
-
 # Backend
-
-### Generate migration
-
-Alembic:
+## Generate database migration
 ```bash 
 alembic revision --autogenerate -m "Commit message"
 alembic upgrade head
+```
+## Running docker compose in development mode 
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yaml watch
 ```

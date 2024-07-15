@@ -1,3 +1,5 @@
+import time
+import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -10,12 +12,14 @@ from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
 from unspoken.enitites.enums.ml_models import Model
 from unspoken.services.ml.base_diarizer import BaseDiarizer
 
+logger = logging.getLogger(__name__)
+
 
 class _Pipeline(Pipeline):
     @classmethod
     def from_pretrained(cls, model_path) -> 'Pipeline':  # noqa
-        path_segmentation_model = str(Path(model_path) / 'segmentation_pyannote.bin')
-        path_embedding_model = str(Path(model_path) / 'embedding_pyannote.bin')
+        path_segmentation_model = str(Path(model_path) / 'segmentation_checkpoint.bin')
+        path_embedding_model = str(Path(model_path) / 'embedding_checkpoint.bin')
 
         pipeline = SpeakerDiarization(
             segmentation_batch_size=32,
@@ -34,7 +38,6 @@ class _Pipeline(Pipeline):
                 },
                 'segmentation': {
                     'min_duration_off': 0.0,
-                    'threshold': 0.4442333667381752,
                 },
             }
         )
@@ -48,12 +51,13 @@ class PyanoteDiarizer(BaseDiarizer):
             Model.diarization.path(),
         ).to(get_device())
 
+    @torch.inference_mode()
     def diarize(self, wav_data: bytes) -> DiarizationResult:
+        start_time = time.time()
         with NamedTemporaryFile(suffix='.wav') as fp:
             fp.write(wav_data)
             fp.flush()
-            with torch.no_grad():
-                diarization = self._pipeline(fp.name)
+            diarization = self._pipeline(fp.name)
 
         result = DiarizationResult()
         speakers = set()
@@ -69,4 +73,7 @@ class PyanoteDiarizer(BaseDiarizer):
                 )
             )
         result.speakers = list(speakers)
+        end_time = time.time()
+        diarization_time = end_time - start_time
+        logger.info(f'Diarization completed in {diarization_time:.3f} seconds.')
         return result

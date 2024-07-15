@@ -32,6 +32,7 @@ def _get_model_info(model_name: str) -> _ModelInfo:
 
 
 def load_model(model: Model):
+    logger.info(f'Loading model {model.value}.')
     model_info = _get_model_info(model.value)
     model_path = model.path()
     if Path(model_path).exists():

@@ -1,3 +1,4 @@
+import time
 import logging
 from io import BytesIO
 
@@ -5,13 +6,14 @@ import torch
 from faster_whisper import WhisperModel
 
 from unspoken.settings import settings
+from unspoken.core.singleton import SingletonMeta
 from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 from unspoken.enitites.enums.ml_models import Model
 
 logger = logging.getLogger(__name__)
 
 
-class Transcriber:
+class Transcriber(metaclass=SingletonMeta):
     def __init__(self):
         self._model = WhisperModel(
             model_size_or_path=Model.large_v3.path(),
@@ -21,13 +23,14 @@ class Transcriber:
             download_root=settings.models_dir_path,
         )
 
+    @torch.inference_mode()
     def transcribe(self, audio: bytes) -> SpeachToTextResult:
-        with torch.no_grad():
-            segments, info = self._model.transcribe(
-                BytesIO(audio),
-                language='ru',
-                task='transcribe',
-            )
+        start_time = time.time()
+        segments, info = self._model.transcribe(
+            BytesIO(audio),
+            language='ru',
+            task='transcribe',
+        )
         result = SpeachToTextResult()
         for segment in segments:
             result.segments.append(
@@ -38,4 +41,8 @@ class Transcriber:
                     text=segment.text.strip(),
                 )
             )
+        end_time = time.time()
+        diarization_time = end_time - start_time
+        logger.info(f'Transcription completed in {diarization_time:.3f} seconds.')
+        torch.cuda.empty_cache()
         return result
