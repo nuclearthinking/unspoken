@@ -37,7 +37,7 @@ def load_model(model: Model):
     if Path(model_path).exists():
         logger.info(f'Model {model.value} already exists, skipping.')
         return
-    logger.info(f'Downloading model {model.value}.')
+    logger.info(f'Downloading model {model.value} to {model.path}.')
     snapshot_download(
         repo_id=model_info.repo_id,
         revision=model_info.revision,

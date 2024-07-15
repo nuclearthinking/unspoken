@@ -1,7 +1,5 @@
 services:
   frontend:
-    profiles:
-      - frontend
     build:
       context: .
       dockerfile: frontend.Dockerfile
@@ -72,8 +70,6 @@ services:
       - api
       - db
   worker-1:
-    profiles:
-      - extra
     build:
       context: .
       dockerfile: worker.Dockerfile
