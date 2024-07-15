@@ -20,7 +20,8 @@ class PyanoteDiarizer(BaseDiarizer):
         with NamedTemporaryFile(suffix='.wav') as fp:
             fp.write(wav_data)
             fp.flush()
-            diarization = self._pipeline(fp.name)
+            with torch.no_grad():
+                diarization = self._pipeline(fp.name)
 
         result = DiarizationResult()
         speakers = set()
