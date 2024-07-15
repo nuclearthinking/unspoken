@@ -1,6 +1,7 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import torch
 from pyannote.audio import Pipeline
 from pyannote.audio.pipelines.speaker_diarization import SpeakerDiarization
 
