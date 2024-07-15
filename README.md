@@ -85,4 +85,4 @@ diarization.
 
 ## Contributing
 
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are wellcome! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details.
