@@ -19,5 +19,5 @@ from .base import (
     get_task_speakers,
     save_diarization_result,
     save_transcription_result,
-    save_speach_to_text_result
+    save_speach_to_text_result,
 )
