@@ -1,8 +1,8 @@
 import logging
 
-from unspoken.settings import settings
-from unspoken.services.queue.broker import celery
 from unspoken.services.ml.pipelines.transcribe_flow import transcribe_audio_flow
+from unspoken.services.queue.broker import celery
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 

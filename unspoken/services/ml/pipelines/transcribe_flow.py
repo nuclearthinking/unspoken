@@ -3,17 +3,18 @@ import logging
 import torch
 
 from unspoken import exceptions
-from unspoken.services import db
 from unspoken.enitites.diarization import DiarizationResult
-from unspoken.enitites.transcription import TranscriptionResult
-from unspoken.enitites.speach_to_text import SpeachToTextResult
-from unspoken.services.ml.transcriber import Transcriber
-from unspoken.services.audio.converter import convert_to_wav
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.enitites.speach_to_text import SpeachToTextResult
+from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.services import db
+from unspoken.services.annotation.annotate_transcription import annotate, annotate_dtw
+from unspoken.services.audio.converter import convert_to_wav
 from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
-from unspoken.services.annotation.annotate_transcription import annotate
+from unspoken.services.ml.transcriber import Transcriber
+from unspoken.core.loader import prepare_models
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('uvicorn')
 
 
 def clear_cuda_cache(func):
@@ -51,6 +52,7 @@ def annotate_transcription(
     stt_result: SpeachToTextResult,
     diarization_result: DiarizationResult,
 ) -> TranscriptionResult:
+    return annotate_dtw(stt_result, diarization_result)
     return annotate(stt_result, diarization_result)
 
 
@@ -67,17 +69,17 @@ def _save_to_database(
 
         db.save_transcription_result(
             task.transcript_id,
-            annotated_transcription.dict(),
+            annotated_transcription.model_dump(),
             session=session,
         )
         db.save_diarization_result(
             task.transcript_id,
-            result=diarization_result.dict(),
+            result=diarization_result.model_dump(),
             session=session,
         )
         db.save_speach_to_text_result(
             task.transcript_id,
-            result=transcription_result.dict(),
+            result=transcription_result.model_dump(),
             session=session,
         )
         logger.info('Saving speakers to database.')
@@ -110,6 +112,11 @@ def _save_to_database(
 
 
 def transcribe_audio_flow(temp_file_id: int, task_id: int):
+
+    logger.info('Initializing models.')
+    prepare_models()
+    logger.info('Models initialized.')
+
     logger.info('Starting transcription flow for task %s.', task_id)
     temp_file = db.get_temp_file(temp_file_id)
     if not temp_file:

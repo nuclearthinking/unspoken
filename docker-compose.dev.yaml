@@ -9,12 +9,3 @@ services:
           target: /app/unspoken
         - path: poetry.lock
           action: rebuild
-  worker:
-    build:
-      target: development
-    develop:
-      watch:
-        - path: ./unspoken
-          target: /app/unspoken
-        - path: poetry.lock
-          action: rebuild

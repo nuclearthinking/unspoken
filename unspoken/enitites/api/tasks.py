@@ -1,11 +1,11 @@
 import datetime
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 from unspoken.enitites.api.messages import MessageResponse
 from unspoken.enitites.api.speakers import SpeakerResponse
-from unspoken.enitites.transcription import TranscriptionSegment
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.enitites.transcription import TranscriptionSegment
 
 
 class TaskResponse(BaseModel):

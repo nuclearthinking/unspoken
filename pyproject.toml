@@ -1,45 +1,32 @@
-[tool.poetry]
+[project]
 name = "unspoken"
 version = "0.1.0"
-description = ""
-authors = ["nuclearthinking"]
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "alembic>=1.13.2",
+    "faster-whisper>=1.0.3",
+    "numpy<2.0.0",
+    "psycopg>=3.2.1",
+    "psycopg2-binary>=2.9.9",
+    "pyannote-audio==3.3.1",
+    "pydantic>=2.9.1",
+    "pydantic-settings>=2.5.2",
+    "pydub>=0.25.1",
+    "sqlalchemy>=2.0.34",
+    "fastapi>=0.114.2",
+    "gunicorn>=23.0.0",
+    "uvicorn>=0.30.6",
+    "python-multipart>=0.0.9",
+    "python-magic>=0.4.27",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-sqlalchemy = "^2.0.23"
-psycopg = "^3.1.9"
-psycopg2-binary = "^2.9.6"
-celery = "^5.3.5"
-pydantic = "^2.7.4"
-pydantic-settings = "^2.3.3"
-pydub = "^0.25.1"
-prefect = "^2.19.7"
-alembic = "^1.13.2"
-
-
-[tool.poetry.group.worker.dependencies]
-numpy = "<2.0.0"
-pyannote-audio = "^3.3.1"
-faster-whisper = "^1.0.2"
-
-[tool.poetry.group.api.dependencies]
-fastapi = "0.111.0"
-gunicorn = "22.0.0"
-uvicorn = "^0.30.1"
-python-multipart = "^0.0.9"
-python-magic = "^0.4.27"
-apscheduler = "^3.10.4"
-gradio = "^4.38.1"
-
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.5.2"
-isort = "^5.12.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+dev-dependencies = [
+    "isort>=5.13.2",
+    "ruff>=0.6.5",
+]
 
 [tool.ruff]
 line-length = 120

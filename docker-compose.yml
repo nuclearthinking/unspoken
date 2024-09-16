@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: api.Dockerfile
-    command: gunicorn unspoken.app:app -w 4 -b :8000 -k uvicorn.workers.UvicornWorker
+    command: /usr/bin/uv run gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
     restart: always
     ports:
       - "8000:8000"
@@ -32,79 +32,21 @@ services:
       rabbitmq_user: "unspoken"
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     volumes:
       - tmp_files_volume:/app/temp_files
+      - models_volume:/app/resources/models
     networks:
       - unspoken_network
     depends_on:
       db:
         condition: service_healthy
-  worker:
-    build:
-      context: .
-      dockerfile: worker.Dockerfile
-    restart: unless-stopped
-    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
-    env_file:
-      - .env
-    environment:
-      db_user: "unspoken"
-      db_password: "changeme"
-      db_host: db
-      rabbitmq_user: "unspoken"
-      rabbitmq_password: "unspoken"
-      rabbitmq_host: amqp
-      device_index: 0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    volumes:
-      - tmp_files_volume:/app/temp_files
-      - models_volume:/app/resources/models
-    networks:
-      - unspoken_network
-    depends_on:
-      - amqp
-      - api
-      - db
-  worker-1:
-    profiles:
-      - extra
-    build:
-      context: .
-      dockerfile: worker.Dockerfile
-    restart: unless-stopped
-    command: celery -A unspoken.services.queue.worker.worker worker -Q transcribe_audio -c 1 --loglevel=INFO
-    env_file:
-      - .env
-    environment:
-      db_user: "unspoken"
-      db_password: "changeme"
-      db_host: db
-      rabbitmq_user: "unspoken"
-      rabbitmq_password: "unspoken"
-      rabbitmq_host: amqp
-      device_index: 1
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    volumes:
-      - tmp_files_volume:/app/temp_files
-      - models_volume:/app/resources/models
-    networks:
-      - unspoken_network
-    depends_on:
-      - amqp
-      - api
-      - db
   db:
     image: postgres:16.1-alpine
     restart: unless-stopped
@@ -122,19 +64,6 @@ services:
       start_period: 10s
     volumes:
       - db:/var/lib/postgresql/data
-    networks:
-      - unspoken_network
-  amqp:
-    image: rabbitmq:3.9.29-management
-    hostname: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=unspoken
-      - RABBITMQ_DEFAULT_PASS=unspoken
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     networks:
       - unspoken_network
 volumes:

@@ -1,22 +1,36 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.10
-LABEL authors="nuclearthinking"
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 
-RUN apt update && \
-    apt -y upgrade && \
-    apt install -y --no-install-recommends \
-    libmagic-dev && \
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libavcodec-extra \
+    gcc \
+    python3-dev \
+    libffi-dev \
+    python3-pip \
+    libmagic-dev \
+    libblas3 \
+    liblapack3 \
+    liblapack-dev \
+    libblas-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install -U pip && pip install poetry
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /app
 
-COPY ["pyproject.toml", "poetry.lock", "README.md", "/app/"]
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync -vv --frozen --no-dev --no-install-project 
 
-RUN poetry config virtualenvs.create false && \
-    poetry install --without worker,dev --no-interaction --no-ansi --no-root
+ADD . /app/
 
-COPY . /app/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync -vv --frozen --no-dev
 
 EXPOSE 8000

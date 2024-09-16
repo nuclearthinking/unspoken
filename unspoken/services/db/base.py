@@ -1,26 +1,48 @@
-import os
-import logging
 import datetime
+import logging
+import os
+import traceback
 from pathlib import Path
-
+import json
 import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
-
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship, scoped_session, sessionmaker
 from alembic import command
 from alembic.config import Config
-from unspoken.settings import settings
-from unspoken.exceptions import TranscriptNotFound
+from alembic.script import ScriptDirectory
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.exceptions import TranscriptNotFound
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 def apply_migrations() -> None:
-    logger.info('Applying migrations.')
-    alembic_cfg = Config(settings.alembic_ini_path)
-    command.upgrade(alembic_cfg, 'head')
-    logger.info('Migrations completed.')
+    logger.info('Starting migration process.')
+    try:
+        alembic_cfg = Config(settings.alembic_ini_path)
+        logger.info(f'Alembic config loaded from: {settings.alembic_ini_path}')
+
+        script = ScriptDirectory.from_config(alembic_cfg)
+
+        with engine.connect() as connection:
+            current_rev = connection.execute(sa.text('SELECT version_num FROM alembic_version')).scalar()
+
+        head_rev = script.get_current_head()
+
+        if current_rev != head_rev:
+            logger.info(f'Current revision: {current_rev}, upgrading to: {head_rev}')
+            command.upgrade(alembic_cfg, 'head')
+            logger.info('Migrations completed successfully.')
+        else:
+            logger.info(f'Database is already at head revision: {head_rev}. Skipping Alembic operations.')
+
+    except Exception as e:
+        logger.error(f'Error during migration: {str(e)}')
+        logger.error(traceback.format_exc())
+        raise
+    finally:
+        logger.info('Migration process finished.')
 
 
 def get_database_url() -> str:
@@ -35,6 +57,8 @@ def get_database_url() -> str:
 
 engine = sa.create_engine(
     get_database_url(),
+    json_serializer=lambda obj: json.dumps(obj, ensure_ascii=False),
+    json_deserializer=json.loads,
     echo=False,
     pool_pre_ping=True,
     pool_size=10,
@@ -228,6 +252,9 @@ def save_speach_to_text_result(id_, result: dict, session: Session = None) -> No
         transcript = session.execute(query).scalar_one_or_none()
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
+        
+        ''.encode('utf-8')
+
         transcript.speach_to_text_result = result
         session.commit()
 

@@ -4,8 +4,8 @@ from celery.signals import worker_process_init
 
 from unspoken.core.loader import prepare_models
 
-from .tasks import transcribe
 from .broker import celery
+from .tasks import transcribe
 
 logger = logging.getLogger(__name__)
 

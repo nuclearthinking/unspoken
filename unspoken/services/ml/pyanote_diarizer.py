@@ -37,7 +37,7 @@ class _Pipeline(Pipeline):
                     'threshold': 0.7045654963945799,
                 },
                 'segmentation': {
-                    'min_duration_off': 0.0,
+                    'min_duration_off': 0.5,
                 },
             }
         )
