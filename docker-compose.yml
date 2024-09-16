@@ -2,11 +2,7 @@ services:
   frontend:
     profiles:
       - frontend
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-      args:
-        VITE_API_HOST: ${VITE_API_HOST:-0.0.0.0}
+    image: gitlab-registry.selectel.org/radchenko.v/unspoken
     restart: always
     networks:
       - unspoken_network
