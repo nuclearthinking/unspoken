@@ -9,7 +9,7 @@ RUN npm install
 COPY frontend/unspoken .
 
 ARG VITE_API_HOST
-ENV VITE_API_HOST=${VITE_API_HOST}
+ENV VITE_API_URL=http://${VITE_API_HOST}:8000/
 
 RUN npm run build
 
