@@ -2,7 +2,7 @@ services:
   frontend:
     profiles:
       - frontend
-    image: gitlab-registry.selectel.org/radchenko.v/unspoken
+    image: gitlab-registry.selectel.org/radchenko.v/unspoken:latest
     restart: always
     networks:
       - unspoken_network
