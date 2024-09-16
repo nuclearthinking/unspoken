@@ -1,10 +1,10 @@
-FROM node:18-alpine AS builder
+FROM node:18.15.0-alpine AS builder
 
 WORKDIR /app
 
 COPY frontend/unspoken/package*.json /app
 
-RUN npm install
+RUN npm cache clean --force && npm install
 
 COPY frontend/unspoken .
 
