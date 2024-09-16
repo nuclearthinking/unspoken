@@ -7,6 +7,7 @@ class MimeType(str, Enum):
     mp3 = 'audio/mpeg'
     wav = 'audio/wav'
     mp4 = 'video/mp4'
+    webm = 'video/webm'
 
     unknown = None
 
@@ -21,4 +22,5 @@ class MimeType(str, Enum):
             self.mp3,
             self.wav,
             self.mp4,
+            self.webm,
         ]

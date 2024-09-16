@@ -1,19 +1,38 @@
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from unspoken.api import tasks_router, upload_router, messages_router, speakers_router, tasks_router_v2
-from unspoken.settings import settings
+from unspoken.api import messages_router, speakers_router, tasks_router, tasks_router_v2, upload_router
 from unspoken.services.db.base import setup as db_setup
+from unspoken.services.ml.pipelines.transcribe_flow import transcribe_audio_flow
+from unspoken.services.task_queue import start_worker, stop_worker
+from unspoken.settings import settings
 
 logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger('uvicorn')
 
-app = FastAPI(debug=True, title='Unspoken')
+
+worker_thread = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    _init_db()
+    _init_temp_file_dir()
+    global worker_thread
+    worker_thread = start_worker(transcribe_audio_flow)
+    yield
+    stop_worker()
+    if worker_thread:
+        worker_thread.join()
+
+
+app = FastAPI(debug=True, title='Unspoken', lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,11 +63,3 @@ def _init_db():
     logger.info('Initializing database')
     db_setup()
     logger.info('Initializing database finished')
-
-
-@app.on_event('startup')
-async def startup_event():
-    logger.info('Starting up')
-    _init_db()
-    _init_temp_file_dir()
-    logger.info('Starting up finished')

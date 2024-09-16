@@ -1,13 +1,13 @@
+import dataclasses
 import json
 import logging
-import dataclasses
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
 
-from unspoken.settings import settings
-from unspoken.exceptions import ModelNotFound, UnspokenException
 from unspoken.enitites.enums.ml_models import Model
+from unspoken.exceptions import ModelNotFound, UnspokenException
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 

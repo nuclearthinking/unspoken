@@ -5,10 +5,14 @@ import magic
 from fastapi import APIRouter, UploadFile, HTTPException
 
 from unspoken.services import db
-from unspoken.settings import settings
+
+# from unspoken.settings import settings
 from unspoken.enitites.api.upload import UploadResponse
-from unspoken.services.queue.broker import celery
+
+# from unspoken.services.queue.broker import celery
 from unspoken.enitites.enums.mime_types import MimeType
+from unspoken.services.task_queue import add_task
+
 
 upload_router = APIRouter(
     prefix='/upload',
@@ -27,12 +31,8 @@ async def upload_audio(file: UploadFile) -> UploadResponse:
     temp_file = db.save_temp_file(db.TempFile(file_name=str(uuid.uuid4()), file_type=MimeType(file_type)))
     temp_file.write(file_data)
     task = db.create_new_task(uploaded_file_name=file.filename)
-    logger.info('Publishing convert audio task for temp_file_id %s', temp_file.id)
-    celery.send_task(
-        'transcribe',
-        kwargs={'temp_file_id': temp_file.id, 'task_id': task.id},
-        queue=settings.transcribe_audio_queue,
-    )
+    logger.info('Publishing task %s', task.id)
+    add_task(temp_file.id, task.id)
     return UploadResponse(
         task_id=task.id,
         task_status=task.status,

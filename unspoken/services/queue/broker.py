@@ -1,7 +1,7 @@
 import logging
 
-from kombu import Queue
 from celery import Celery
+from kombu import Queue
 
 from unspoken.settings import settings
 
@@ -20,5 +20,8 @@ celery.conf.update(
     worker_hijack_root_logger=False,
 )
 celery.conf.task_queues = [
-    Queue(settings.transcribe_audio_queue, routing_key=settings.transcribe_audio_routing_key),
+    Queue(
+        settings.transcribe_audio_queue,
+        routing_key=settings.transcribe_audio_routing_key,
+    ),
 ]

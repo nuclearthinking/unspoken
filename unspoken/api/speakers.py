@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from unspoken.services import db
 from unspoken.enitites.api.speakers import SpeakerResponse, UpdateSpeakerNameRequest
+from unspoken.services import db
 
 speakers_router = APIRouter(
     prefix='/speakers',

@@ -1,14 +1,14 @@
-import time
 import logging
+import time
 from io import BytesIO
 
 import torch
 from faster_whisper import WhisperModel
 
-from unspoken.settings import settings
 from unspoken.core.singleton import SingletonMeta
-from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 from unspoken.enitites.enums.ml_models import Model
+from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
+from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ class Transcriber(metaclass=SingletonMeta):
             BytesIO(audio),
             language='ru',
             task='transcribe',
+            word_timestamps=True,
         )
         result = SpeachToTextResult()
         for segment in segments:
