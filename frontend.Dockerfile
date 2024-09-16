@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY frontend/unspoken/package*.json /app
 
-RUN npm cache clean --force && npm install
+RUN npm install \
+    && npm install typescript -g
 
 COPY frontend/unspoken .
 
