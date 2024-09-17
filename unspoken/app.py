@@ -2,8 +2,10 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from unspoken.api import messages_router, speakers_router, tasks_router, tasks_router_v2, upload_router
 from unspoken.services.db.base import setup as db_setup
@@ -49,6 +51,14 @@ app.include_router(tasks_router_v2)
 app.include_router(messages_router)
 app.include_router(speakers_router)
 
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="static")
+
+@app.get("/{full_path:path}")
+async def serve_spa(request: Request, full_path: str):
+    if full_path.startswith("api/"):
+        return await request.app.router(request)
+    else:
+        return FileResponse("frontend/dist/index.html")
 
 def _init_temp_file_dir():
     logger.info('Initializing temp files directory')
