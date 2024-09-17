@@ -6,10 +6,10 @@ const hostname = window.location.hostname
 
 const API_BASE_URL = `${protocol}//${hostname}:${API_PORT}`
 export const API = {
-  upload: `${API_BASE_URL}/upload/media`,
-  getTask: (id: number) => `${API_BASE_URL}/task/${id}/`,
-  updateSpeakerName: (speakerId: number) => `${API_BASE_URL}/speakers/${speakerId}/name`,
-  updateMessageSpeaker: (messageId: number) => `${API_BASE_URL}/messages/${messageId}/speaker`,
+  upload: `${API_BASE_URL}/api/upload/media`,
+  getTask: (id: number) => `${API_BASE_URL}/api/task/${id}/`,
+  updateSpeakerName: (speakerId: number) => `${API_BASE_URL}/api/speakers/${speakerId}/name`,
+  updateMessageSpeaker: (messageId: number) => `${API_BASE_URL}/api/messages/${messageId}/speaker`,
 };
 
 

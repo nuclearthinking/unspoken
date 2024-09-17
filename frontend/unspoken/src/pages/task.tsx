@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useLoaderData, LoaderFunctionArgs } from 'react-router-dom';
 import { API } from '@/api';
 import { TaskResponse, TaskStatus } from '@/types/api';
+import { AlertCircle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Header } from '@/components/header';
 
 
@@ -64,9 +66,9 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<TaskRespon
 export default function Task() {
     const data = useLoaderData() as TaskResponse;
     const [taskData, setTaskData] = useState<TaskResponse>(data);
-    const [isLoading, setIsLoading] = useState(taskData.status === TaskStatus.queued || taskData.status === TaskStatus.transcribing);
+    const [isLoading, setIsLoading] = useState(taskData.status === TaskStatus.queued || taskData.status === TaskStatus.processing);
     const [messages, setMessages] = useState<DisplayMessage[]>(convertToDisplayMessages(taskData.messages));
-
+    const [error, setError] = useState(taskData.status === TaskStatus.failed)
 
     const [audioInfo] = useState<AudioInfo>({
         title: data.file_name || "Team Meeting - Q2 Planning",
@@ -92,8 +94,15 @@ export default function Task() {
                     setMessages(convertToDisplayMessages(updatedData.messages));
                     clearInterval(intervalId);
                 }
+
+                if (updatedData.status === TaskStatus.failed) {
+                    setIsLoading(false)
+                    setError(true)
+                    clearInterval(intervalId)
+                }
             } catch (error) {
                 console.error("Error checking task status:", error);
+                setError(true)
             }
         };
 
@@ -143,6 +152,12 @@ export default function Task() {
                             ))}
                         </div>
                     </div>
+                ) : error ? (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>Failed to transcribe audio. Please try again.</AlertDescription>
+                    </Alert>
                 ) : (
                     <div className="max-w-4xl mx-auto">
                         <div className="bg-card rounded-lg shadow-sm mb-6 p-4">

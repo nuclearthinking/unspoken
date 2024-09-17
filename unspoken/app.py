@@ -45,20 +45,20 @@ app.add_middleware(
     allow_credentials=True,
 )
 
-app.include_router(tasks_router)
-app.include_router(upload_router)
-app.include_router(tasks_router_v2)
-app.include_router(messages_router)
-app.include_router(speakers_router)
+app.include_router(tasks_router, prefix='/api')
+app.include_router(upload_router, prefix='/api')
+app.include_router(tasks_router_v2, prefix='/api')
+app.include_router(messages_router, prefix='/api')
+app.include_router(speakers_router, prefix='/api')
 
-app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="static")
+app.mount("/assets", StaticFiles(directory=Path(settings.frontend_build_path) / "assets"), name="static")
 
 @app.get("/{full_path:path}")
 async def serve_spa(request: Request, full_path: str):
     if full_path.startswith("api/"):
-        return await request.app.router(request)
+        return await request.app.router(request.scope, request.receive, request.send)
     else:
-        return FileResponse("frontend/dist/index.html")
+        return FileResponse(Path(settings.frontend_build_path) / "index.html")
 
 def _init_temp_file_dir():
     logger.info('Initializing temp files directory')

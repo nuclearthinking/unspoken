@@ -253,8 +253,6 @@ def save_speach_to_text_result(id_, result: dict, session: Session = None) -> No
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
         
-        ''.encode('utf-8')
-
         transcript.speach_to_text_result = result
         session.commit()
 

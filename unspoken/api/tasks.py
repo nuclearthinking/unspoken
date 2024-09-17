@@ -44,7 +44,10 @@ def squeeze_messages(messages: list[TranscriptionSegment]) -> list[Transcription
             continue
 
         if last_message.speaker == message.speaker:
-            if last_message.text.endswith(',') or last_message.text.endswith('.'):
+
+            last_message.end = message.end
+
+            if last_message.text[-1] in ('.', ',', '!', '?', ';', ':'):
                 connection_symbol = ' '
             else:
                 connection_symbol = ', '

@@ -53,6 +53,7 @@ export default function Home() {
         },
         maxFiles: 1,
         multiple: false,
+        noClick: true,
     })
 
     return (

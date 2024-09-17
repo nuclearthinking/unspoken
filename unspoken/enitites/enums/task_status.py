@@ -3,9 +3,7 @@ from enum import Enum
 
 class TaskStatus(str, Enum):
     queued = 'queued'
-    conversion = 'conversion'
-    diarization = 'diarization'
-    transcribing = 'transcribing'
+    processing = 'processing'
     completed = 'completed'
     failed = 'failed'
     unknown = None
