@@ -128,7 +128,7 @@ def transcribe_audio_flow(temp_file_id: int, task_id: int):
         temp_file.delete()
         raise exceptions.TaskNotFoundError(f'Task with id: {task_id} was not found.')
     try:
-        db.update_task(task, status=TaskStatus.transcribing)
+        db.update_task(task, status=TaskStatus.processing)
         logger.info('Converting audio for tmp_file_id %s.', temp_file_id)
         wav_data = _convert_audio(source_file_data=temp_file.read())
         logger.info('Diarizing audio for task_id %s.', task_id)

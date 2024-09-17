@@ -32,5 +32,6 @@ class _Settings(BaseSettings):
     models_dir_path: str = 'resources/models'
     models_lock_path: str = 'resources/models_lock.json'
 
+    frontend_build_path: str = 'frontend/dist'
 
 settings = _Settings()

@@ -2,9 +2,7 @@
 
 export enum TaskStatus {
     queued = 'queued',
-    conversion = 'conversion',
-    diarization = 'diarization',
-    transcribing = 'transcribing',
+    processing = 'processing',
     completed = 'completed',
     failed = 'failed',
 }
