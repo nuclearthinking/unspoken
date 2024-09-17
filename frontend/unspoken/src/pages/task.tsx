@@ -116,15 +116,9 @@ export default function Task() {
     }, [isLoading, taskData.id]);
 
 
-
-    const [copied, setCopied] = useState(false)
-
     const exportTranscript = () => {
         const transcript = messages.map(m => `[${m.timestamp}] ${m.speaker}: ${m.text}`).join('\n')
-        navigator.clipboard.writeText(transcript).then(() => {
-            setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
-        })
+        navigator.clipboard.writeText(transcript)
     }
 
     return (
@@ -132,8 +126,8 @@ export default function Task() {
             <Header
                 showCopyTranscript={!isLoading}
                 onCopyTranscript={exportTranscript}
-                copied={copied}
                 isLoading={isLoading}
+                error={error}
             />
             <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 min-w-[640px]">
                 {isLoading ? (
