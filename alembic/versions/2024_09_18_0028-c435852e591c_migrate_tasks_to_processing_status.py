@@ -27,7 +27,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.execute("""
-        UPDATE tasks
+        UPDATE task
         SET status = 'failed'
         WHERE status = 'processing'
     """)
