@@ -1,23 +1,15 @@
 services:
-  frontend:
-    image: gitlab-registry.selectel.org/radchenko.v/unspoken:latest
-    platform: linux/amd64
-    restart: always
-    networks:
-      - unspoken_network
-    depends_on:
-      - api
-    ports:
-      - "80:80"
-      - "443:443"
-  api:
+  app:
     build:
       context: .
-      dockerfile: api.Dockerfile
-    command: /usr/bin/uv run gunicorn unspoken.app:app -w 1 -b :8000 -k uvicorn.workers.UvicornWorker
+      dockerfile: Dockerfile
+      args:
+        - PORT=${PORT:-8soxk0}
+        - CACHE_BUST=${CACHE_BUST:-1}
+    command: /bin/sh -c "uv run gunicorn unspoken.app:app -w 2 -b ${HOST}:${PORT} -k uvicorn.workers.UvicornWorker"
     restart: always
     ports:
-      - "8000:8000"
+      - "80:80"
     env_file:
       - .env
     environment:

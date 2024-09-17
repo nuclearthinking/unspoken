@@ -14,5 +14,4 @@ class MessageResponse(BaseModel):
     speaker_id: int | None = Field(default=None)
 
     class Config:
-        # orm_mode = True
         from_attributes = True

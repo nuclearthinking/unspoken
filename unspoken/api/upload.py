@@ -6,10 +6,8 @@ from fastapi import APIRouter, UploadFile, HTTPException
 
 from unspoken.services import db
 
-# from unspoken.settings import settings
 from unspoken.enitites.api.upload import UploadResponse
 
-# from unspoken.services.queue.broker import celery
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.services.task_queue import add_task
 
