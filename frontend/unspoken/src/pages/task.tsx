@@ -117,8 +117,7 @@ export default function Task() {
 
 
     const exportTranscript = () => {
-        const transcript = messages.map(m => `[${m.timestamp}] ${m.speaker}: ${m.text}`).join('\n')
-        navigator.clipboard.writeText(transcript)
+        return  messages.map(m => `[${m.timestamp}] ${m.speaker}: ${m.text}`).join('\n')
     }
 
     return (

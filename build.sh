@@ -9,7 +9,7 @@ fi
 
 VERSION=$1
 
-docker buildx build --platform linux/amd64 -t gitlab-registry.selectel.org/radchenko.v/unspoken:${VERSION} -f frontend.Dockerfile .
-docker buildx build --platform linux/amd64 -t gitlab-registry.selectel.org/radchenko.v/unspoken:latest -f frontend.Dockerfile .
+docker buildx build --platform linux/amd64 -t gitlab-registry.selectel.org/radchenko.v/unspoken:${VERSION} .
+docker buildx build --platform linux/amd64 -t gitlab-registry.selectel.org/radchenko.v/unspoken:latest .
 docker push gitlab-registry.selectel.org/radchenko.v/unspoken:${VERSION}
 docker push gitlab-registry.selectel.org/radchenko.v/unspoken:latest

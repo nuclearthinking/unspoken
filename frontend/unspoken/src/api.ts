@@ -4,7 +4,7 @@ const hostname = window.location.hostname
 
 
 
-const API_BASE_URL = `${protocol}//${hostname}:${API_PORT}`
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${protocol}//${hostname}:${API_PORT}`
 export const API = {
   upload: `${API_BASE_URL}/api/upload/media`,
   getTask: (id: number) => `${API_BASE_URL}/api/task/${id}/`,

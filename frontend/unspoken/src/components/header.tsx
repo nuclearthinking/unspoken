@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ClipboardCopyIcon, CheckIcon } from "lucide-react";
+import clipboardCopy from 'clipboard-copy';
 import GithubIcon from '@/assets/github.svg';
 import LogoSvg from './logo_svg';
 
@@ -19,16 +20,28 @@ const Logo = () => {
     )
 }
 
+
 const CopyTranscriptButton = ({ onCopyTranscript, disabled }: {
-    onCopyTranscript: () => void,
+    onCopyTranscript: () => string,
     disabled: boolean,
 }) => {
-    const [copied, setCopied] = React.useState(false);
+    const [copied, setCopied] = useState(false);
+    const [error, setError] = useState(false);
 
-    const handleCopy = () => {
-        onCopyTranscript();
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+    const handleCopy = async () => {
+        try {
+            const transcript = onCopyTranscript();
+            await clipboardCopy(transcript);
+            setCopied(true);
+        } catch (err) {
+            console.error('Unable to copy to clipboard', err);
+            setError(true);
+        } finally {
+            setTimeout(() => {
+                setCopied(false);
+                setError(false);
+            }, 2000);
+        }
     };
 
     return (
@@ -37,6 +50,11 @@ const CopyTranscriptButton = ({ onCopyTranscript, disabled }: {
                 <>
                     <CheckIcon className="h-4 w-4 mr-2" />
                     Copied!
+                </>
+            ) : error ? (
+                <>
+                    <ClipboardCopyIcon className="h-4 w-4 mr-2" />
+                    <span className="text-red-500">Copy failed!</span>
                 </>
             ) : (
                 <>
@@ -50,12 +68,12 @@ const CopyTranscriptButton = ({ onCopyTranscript, disabled }: {
 
 interface HeaderProps {
     showCopyTranscript: boolean;
-    onCopyTranscript: () => void;
+    onCopyTranscript: () => string;
     isLoading: boolean;
     error: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ showCopyTranscript, onCopyTranscript, isLoading , error}) => {
+export const Header: React.FC<HeaderProps> = ({ showCopyTranscript, onCopyTranscript, isLoading, error }) => {
     return (
         <header className="sticky top-0 z-10 w-full border-b bg-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 min-w-[640px]">
@@ -65,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({ showCopyTranscript, onCopyTransc
                     </div>
                     {showCopyTranscript && (
                         <div className="flex-1 flex justify-center sm:justify-end">
-                            <CopyTranscriptButton 
+                            <CopyTranscriptButton
                                 onCopyTranscript={onCopyTranscript}
                                 disabled={isLoading || error}
                             />
