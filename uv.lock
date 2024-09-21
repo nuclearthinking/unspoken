@@ -1253,6 +1253,22 @@ wheels = [
 ]
 
 [[package]]
+name = "noisereduce"
+version = "3.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "librosa" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d5/86/0464eed7689445ef938992e82e799072689849217a83990c3056378f9129/noisereduce-3.0.2.tar.gz", hash = "sha256:0a532d2223986e8295ae57a8f86fb4699a477636841237ffa8c323c959bd9c0b", size = 21028 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f0/5e/d3c72f395b71d1bf513cfa5b990dd5421aa74de3670eaab53e51ae6ce401/noisereduce-3.0.2-py3-none-any.whl", hash = "sha256:552552d148a147578c72532ee4ded253a3a4d12446f171e5bd19fdc8b10211aa", size = 22175 },
+]
+
+[[package]]
 name = "numba"
 version = "0.60.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2693,6 +2709,8 @@ dependencies = [
     { name = "fastapi" },
     { name = "faster-whisper" },
     { name = "gunicorn" },
+    { name = "librosa" },
+    { name = "noisereduce" },
     { name = "numpy" },
     { name = "psycopg" },
     { name = "psycopg2-binary" },
@@ -2702,6 +2720,7 @@ dependencies = [
     { name = "pydub" },
     { name = "python-magic" },
     { name = "python-multipart" },
+    { name = "speechbrain" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
 ]
@@ -2718,6 +2737,8 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.114.2" },
     { name = "faster-whisper", specifier = ">=1.0.3" },
     { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "librosa", specifier = ">=0.10.2.post1" },
+    { name = "noisereduce", specifier = ">=3.0.2" },
     { name = "numpy", specifier = "<2.0.0" },
     { name = "psycopg", specifier = ">=3.2.1" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
@@ -2727,6 +2748,7 @@ requires-dist = [
     { name = "pydub", specifier = ">=0.25.1" },
     { name = "python-magic", specifier = ">=0.4.27" },
     { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "speechbrain", specifier = ">=1.0.1" },
     { name = "sqlalchemy", specifier = ">=2.0.34" },
     { name = "uvicorn", specifier = ">=0.30.6" },
 ]

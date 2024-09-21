@@ -20,6 +20,9 @@ dependencies = [
     "uvicorn>=0.30.6",
     "python-multipart>=0.0.9",
     "python-magic>=0.4.27",
+    "librosa>=0.10.2.post1",
+    "noisereduce>=3.0.2",
+    "speechbrain>=1.0.1",
 ]
 
 [tool.uv]
