@@ -1,7 +1,10 @@
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
+
 from unspoken.enitites.enums.labeling_task_status import LabelingTaskStatus
 from unspoken.enitites.enums.labeling_segment_status import LabelingSegmentStatus
+
 
 class LabelingSegmentResponse(BaseModel):
     id: int
@@ -14,6 +17,7 @@ class LabelingSegmentResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
 class LabelingTaskResponse(BaseModel):
     id: int
     transcript_id: int
@@ -23,6 +27,7 @@ class LabelingTaskResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class UpdateLabelingSegmentRequest(BaseModel):
     status: LabelingSegmentStatus

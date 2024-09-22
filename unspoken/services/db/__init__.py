@@ -17,10 +17,10 @@ from .base import (
     create_new_task,
     get_task_messages,
     get_task_speakers,
+    create_labeling_task,
     save_diarization_result,
+    create_labeling_segments,
     save_transcription_result,
     save_speach_to_text_result,
-    create_labeling_task,
-    create_labeling_segments,
     get_labeling_task_by_task_id,
 )

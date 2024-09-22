@@ -25,6 +25,7 @@ class ModelNotFound(UnspokenException):
 class NoDiarizedSegmentsError(UnspokenException):
     """Raised when no valid segments found for diarization."""
 
+
 class LabelingTaskNotFound(UnspokenException):
     """Raised when a labeling task cannot be found."""
 

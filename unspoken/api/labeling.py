@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
+
 from unspoken.services import db
-from unspoken.enitites.api.labeling import LabelingTaskResponse, UpdateLabelingSegmentRequest, LabelingSegmentResponse
+from unspoken.enitites.api.labeling import LabelingTaskResponse, LabelingSegmentResponse, UpdateLabelingSegmentRequest
 
 labeling_router = APIRouter(prefix='/labeling', tags=['Labeling'])
+
 
 @labeling_router.get('/task/{task_id}')
 def get_labeling_task(task_id: int) -> LabelingTaskResponse:
@@ -10,10 +12,7 @@ def get_labeling_task(task_id: int) -> LabelingTaskResponse:
     if not labeling_task:
         raise HTTPException(status_code=404, detail='Labeling task not found.')
 
-    segments = [
-        LabelingSegmentResponse.from_orm(segment)
-        for segment in labeling_task.segments
-    ]
+    segments = [LabelingSegmentResponse.from_orm(segment) for segment in labeling_task.segments]
 
     return LabelingTaskResponse(
         id=labeling_task.id,
@@ -22,6 +21,7 @@ def get_labeling_task(task_id: int) -> LabelingTaskResponse:
         status=labeling_task.status,
         segments=segments,
     )
+
 
 @labeling_router.post('/task/{task_id}/segment/{segment_id}')
 def update_labeling_segment(
@@ -46,4 +46,3 @@ def update_labeling_segment(
     )
 
     return {'message': 'Segment updated successfully.'}
-

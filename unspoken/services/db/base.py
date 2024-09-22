@@ -13,12 +13,11 @@ from alembic.config import Config
 from alembic.script import ScriptDirectory
 from unspoken.settings import settings
 from unspoken.exceptions import TranscriptNotFound
+from unspoken.enitites.transcription import TranscriptionSegment
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.enitites.enums.labeling_segment_status import LabelingSegmentStatus
 from unspoken.enitites.enums.labeling_task_status import LabelingTaskStatus
-from unspoken.enitites.transcription import TranscriptionSegment
-
+from unspoken.enitites.enums.labeling_segment_status import LabelingSegmentStatus
 
 logger = logging.getLogger(__name__)
 

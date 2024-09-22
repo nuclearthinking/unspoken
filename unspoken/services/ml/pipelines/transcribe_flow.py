@@ -1,6 +1,8 @@
+import io
 import logging
 
 import torch
+from pydub import AudioSegment
 
 from unspoken import exceptions
 from unspoken.services import db
@@ -11,23 +13,8 @@ from unspoken.enitites.speach_to_text import SpeachToTextResult
 from unspoken.services.ml.transcriber import Transcriber
 from unspoken.services.audio.converter import convert_to_wav
 from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.services.annotation.annotate_transcription import annotate_dtw
 from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
-
-import io
-import logging
-from pydub import AudioSegment
-from unspoken import exceptions
-from unspoken.services import db
-from unspoken.core.loader import prepare_models
-from unspoken.enitites.diarization import DiarizationResult
-from unspoken.enitites.transcription import TranscriptionResult
-from unspoken.enitites.speach_to_text import SpeachToTextResult
-from unspoken.services.ml.transcriber import Transcriber
-from unspoken.services.audio.converter import convert_to_wav, preprocess_audio
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.services.ml.speechbarin_diarizer import SpeechBrainDiarizer
-from unspoken.services.db.base import LabelingTaskStatus, LabelingSegmentStatus
+from unspoken.services.annotation.annotate_transcription import annotate_dtw
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +40,14 @@ def _convert_audio(source_file_data: bytes):
     wav_data = convert_to_wav(source_file_data)
     return wav_data
 
+
 def convert_wav_to_mp3(wav_data: bytes) -> bytes:
     """Convert WAV audio data to MP3 format."""
     wav_audio = AudioSegment.from_wav(io.BytesIO(wav_data))
     mp3_buffer = io.BytesIO()
-    wav_audio.export(mp3_buffer, format="mp3")
+    wav_audio.export(mp3_buffer, format='mp3')
     return mp3_buffer.getvalue()
+
 
 @clear_cuda_cache
 def _transcribe_audio(wav_data: bytes) -> SpeachToTextResult:
@@ -133,6 +122,7 @@ def _save_to_database(
         db.save_messages(messages_to_save, session=session)
     logger.info('Saved %s messages.', len(messages_to_save))
 
+
 def create_labeling_task(task_id: int, mp3_data: bytes, transcription_result: TranscriptionResult) -> None:
     """Create a new labeling task with segments from the MP3 file and transcription result."""
     with db.Session() as session:
@@ -144,13 +134,11 @@ def create_labeling_task(task_id: int, mp3_data: bytes, transcription_result: Tr
             transcript_id=task.transcript.id,
             audio_data=mp3_data,
             file_name=f"{task.uploaded_file_name.rsplit('.', 1)[0]}.mp3",
-            session=session
+            session=session,
         )
 
         db.create_labeling_segments(
-            labeling_task_id=labeling_task.id,
-            segments=transcription_result.messages,
-            session=session
+            labeling_task_id=labeling_task.id, segments=transcription_result.messages, session=session
         )
 
         logger.info(f'Created labeling task for task_id {task_id}')
