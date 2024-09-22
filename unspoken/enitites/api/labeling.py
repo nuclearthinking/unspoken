@@ -15,7 +15,7 @@ class LabelingSegmentResponse(BaseModel):
     status: LabelingSegmentStatus
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LabelingTaskResponse(BaseModel):
@@ -26,7 +26,7 @@ class LabelingTaskResponse(BaseModel):
     segments: List[LabelingSegmentResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UpdateLabelingSegmentRequest(BaseModel):

@@ -19,6 +19,7 @@ from .base import (
     get_task_speakers,
     create_labeling_task,
     save_diarization_result,
+    update_labeling_segment,
     create_labeling_segments,
     save_transcription_result,
     save_speach_to_text_result,

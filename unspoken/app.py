@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from unspoken.api import tasks_router, upload_router, messages_router, speakers_router, tasks_router_v2
+from unspoken.api import tasks_router, upload_router, labeling_router, messages_router, speakers_router, tasks_router_v2
 from unspoken.settings import settings
 from unspoken.services.db.base import setup as db_setup
 from unspoken.services.task_queue import stop_worker, start_worker
@@ -51,6 +51,8 @@ app.include_router(upload_router, prefix='/api')
 app.include_router(tasks_router_v2, prefix='/api')
 app.include_router(messages_router, prefix='/api')
 app.include_router(speakers_router, prefix='/api')
+app.include_router(labeling_router, prefix='/api')
+
 
 app.mount('/assets', StaticFiles(directory=Path(settings.frontend_build_path) / 'assets'), name='static')
 
@@ -60,17 +62,26 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content={'status': 'error', 'details': exc.detail})
 
 
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc: HTTPException):
+    if request.url.path.startswith('/api'):
+        return JSONResponse(status_code=404, content={'status': 'error', 'detail': 'API endpoint not found.'})
+    return FileResponse(Path(settings.frontend_build_path) / 'index.html')
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(status_code=422, content={'status': 'error', 'details': str(exc)})
 
 
+@app.get('/api/{full_path:path}')
+async def api_not_found(full_path: str):
+    raise HTTPException(status_code=404, detail='API route not found')
+
+
 @app.get('/{full_path:path}')
-async def serve_spa(request: Request, full_path: str):
-    if full_path.startswith('api/'):
-        return await request.app.router(request.scope, request.receive, request.send)
-    else:
-        return FileResponse(Path(settings.frontend_build_path) / 'index.html')
+async def serve_spa(full_path: str):
+    return FileResponse(Path(settings.frontend_build_path) / 'index.html')
 
 
 def _init_temp_file_dir():

@@ -4,9 +4,10 @@ import logging
 import datetime
 import traceback
 from pathlib import Path
+from datetime import timezone
 
 import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
+from sqlalchemy.orm import Mapped, DeclarativeBase, relationship, sessionmaker, mapped_column, scoped_session
 
 from alembic import command
 from alembic.config import Config
@@ -73,13 +74,9 @@ engine = sa.create_engine(
 Session = scoped_session(sessionmaker(autocommit=False, bind=engine))
 
 
-class Base:
+class Base(DeclarativeBase):
     created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-
-
-Base = declarative_base(cls=Base)
-Base.query = Session.query_property()
 
 
 def setup() -> None:
@@ -94,8 +91,6 @@ class Transcript(Base):
     speach_to_text_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
     diarization_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
     transcription_result: Mapped[dict | list] = mapped_column(sa.JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
 
 class TempFile(Base):
@@ -173,16 +168,17 @@ class LabelingTask(Base):
     transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
     audio_data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
     file_name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
-    status: Mapped[str] = mapped_column(
+    status: Mapped[LabelingTaskStatus] = mapped_column(
         sa.Enum(LabelingTaskStatus, native_enum=False),
         nullable=False,
         default=LabelingTaskStatus.queued,
     )
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
     segments: Mapped[list['LabelingSegment']] = relationship(
-        'LabelingSegment', back_populates='labeling_task', cascade='all, delete-orphan'
+        'LabelingSegment',
+        back_populates='labeling_task',
+        cascade='all, delete-orphan',
+        lazy='joined',
     )
 
 
@@ -196,13 +192,11 @@ class LabelingSegment(Base):
     end: Mapped[float] = mapped_column(sa.Float, nullable=False)
     text: Mapped[str] = mapped_column(sa.Text, nullable=False)
     speaker: Mapped[str] = mapped_column(sa.String(255), nullable=False)
-    status: Mapped[str] = mapped_column(
+    status: Mapped[LabelingSegmentStatus] = mapped_column(
         sa.Enum(LabelingSegmentStatus, native_enum=False),
         nullable=False,
         default=LabelingSegmentStatus.in_progress,
     )
-    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
 
 def get_labeling_task_by_task_id(task_id: int, session: Session = None) -> LabelingTask | None:
@@ -215,7 +209,10 @@ def get_labeling_task_by_task_id(task_id: int, session: Session = None) -> Label
 
 
 def create_labeling_task(
-    transcript_id: int, audio_data: bytes, file_name: str, session: Session = None
+    transcript_id: int,
+    audio_data: bytes,
+    file_name: str,
+    session: Session = None,
 ) -> LabelingTask:
     session = session or Session()
     with session:
@@ -232,7 +229,9 @@ def create_labeling_task(
 
 
 def create_labeling_segments(
-    labeling_task_id: int, segments: list[TranscriptionSegment], session: Session = None
+    labeling_task_id: int,
+    segments: list[TranscriptionSegment],
+    session: Session = None,
 ) -> None:
     session = session or Session()
     with session:
@@ -289,13 +288,19 @@ def update_labeling_task_status(task_id: int, status: LabelingTaskStatus, sessio
             session.commit()
 
 
-def update_labeling_segment(segment_id: int, **kwargs) -> None:
+def update_labeling_segment(segment_id: int, **kwargs) -> LabelingSegment:
     with Session() as session:
         segment = session.query(LabelingSegment).filter(LabelingSegment.id == segment_id).first()
-        if segment:
-            for key, value in kwargs.items():
-                setattr(segment, key, value)
-            segment.updated_at = datetime.datetime.utcnow()
+        if not segment:
+            raise ValueError(f'Segment with id {segment_id} not found.')
+        if not kwargs:
+            return segment
+        for key, value in kwargs.items():
+            setattr(segment, key, value)
+        segment.updated_at = datetime.datetime.now(tz=timezone.utc)
+        session.commit()
+        session.refresh(segment)
+        return segment
 
 
 def create_speaker(name: str, task_id: int, session: Session = None) -> Speaker:

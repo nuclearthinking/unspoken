@@ -1,17 +1,15 @@
-import io
 import logging
 
 import torch
-from pydub import AudioSegment
 
 from unspoken import exceptions
 from unspoken.services import db
 from unspoken.core.loader import prepare_models
 from unspoken.enitites.diarization import DiarizationResult
 from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.services.audio_service import AudioService
 from unspoken.enitites.speach_to_text import SpeachToTextResult
 from unspoken.services.ml.transcriber import Transcriber
-from unspoken.services.audio.converter import convert_to_wav
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
 from unspoken.services.annotation.annotate_transcription import annotate_dtw
@@ -37,16 +35,12 @@ def clear_cuda_cache(func):
 
 
 def _convert_audio(source_file_data: bytes):
-    wav_data = convert_to_wav(source_file_data)
+    wav_data = AudioService(source_file_data).to_wav()
     return wav_data
 
 
 def convert_wav_to_mp3(wav_data: bytes) -> bytes:
-    """Convert WAV audio data to MP3 format."""
-    wav_audio = AudioSegment.from_wav(io.BytesIO(wav_data))
-    mp3_buffer = io.BytesIO()
-    wav_audio.export(mp3_buffer, format='mp3')
-    return mp3_buffer.getvalue()
+    return AudioService(wav_data).to_mp3()
 
 
 @clear_cuda_cache

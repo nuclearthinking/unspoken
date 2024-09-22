@@ -719,6 +719,18 @@ wheels = [
 ]
 
 [[package]]
+name = "ffmpeg-python"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "future" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/dd/5e/d5f9105d59c1325759d838af4e973695081fbbc97182baf73afc78dec266/ffmpeg-python-0.2.0.tar.gz", hash = "sha256:65225db34627c578ef0e11c8b1eb528bb35e024752f6f10b78c011f6f64c4127", size = 21543 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d7/0c/56be52741f75bad4dc6555991fabd2e07b432d333da82c11ad701123888a/ffmpeg_python-0.2.0-py3-none-any.whl", hash = "sha256:ac441a0404e053f8b6a1113a77c0f452f1cfc62f6344a769475ffdc0f56c23c5", size = 25024 },
+]
+
+[[package]]
 name = "filelock"
 version = "3.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -844,6 +856,15 @@ wheels = [
 [package.optional-dependencies]
 http = [
     { name = "aiohttp" },
+]
+
+[[package]]
+name = "future"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/b2/4140c69c6a66432916b26158687e821ba631a4c9273c474343badf84d3ba/future-1.0.0.tar.gz", hash = "sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05", size = 1228490 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216", size = 491326 },
 ]
 
 [[package]]
@@ -2670,15 +2691,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pydub"
-version = "0.25.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fe/9a/e6bca0eed82db26562c73b5076539a4a08d3cffd19c3cc5913a3e61145fd/pydub-0.25.1.tar.gz", hash = "sha256:980a33ce9949cab2a569606b65674d748ecbca4f0796887fd6f46173a7b0d30f", size = 38326 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/53/d78dc063216e62fc55f6b2eebb447f6a4b0a59f55c8406376f76bf959b08/pydub-0.25.1-py2.py3-none-any.whl", hash = "sha256:65617e33033874b59d87db603aa1ed450633288aefead953b30bded59cb599a6", size = 32327 },
-]
-
-[[package]]
 name = "pygments"
 version = "2.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3802,6 +3814,7 @@ dependencies = [
     { name = "alembic" },
     { name = "fastapi" },
     { name = "faster-whisper" },
+    { name = "ffmpeg-python" },
     { name = "gunicorn" },
     { name = "librosa" },
     { name = "noisereduce" },
@@ -3811,7 +3824,6 @@ dependencies = [
     { name = "pyannote-audio" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "pydub" },
     { name = "python-magic" },
     { name = "python-multipart" },
     { name = "speechbrain" },
@@ -3832,6 +3844,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.13.2" },
     { name = "fastapi", specifier = ">=0.114.2" },
     { name = "faster-whisper", specifier = ">=1.0.3" },
+    { name = "ffmpeg-python", specifier = ">=0.2.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "librosa", specifier = ">=0.10.2.post1" },
     { name = "noisereduce", specifier = ">=3.0.2" },
@@ -3841,7 +3854,6 @@ requires-dist = [
     { name = "pyannote-audio", specifier = "==3.3.1" },
     { name = "pydantic", specifier = ">=2.9.1" },
     { name = "pydantic-settings", specifier = ">=2.5.2" },
-    { name = "pydub", specifier = ">=0.25.1" },
     { name = "python-magic", specifier = ">=0.4.27" },
     { name = "python-multipart", specifier = ">=0.0.9" },
     { name = "speechbrain", specifier = ">=1.0.1" },
