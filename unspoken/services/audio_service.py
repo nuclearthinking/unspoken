@@ -19,8 +19,8 @@ def _convert_to_wav(source_data: bytes) -> bytes:
                 format='wav',
                 acodec='pcm_s16le',  # 16-bit depth is sufficient
                 ar=16000,  # 16 kHz sample rate
-                ac=1, # Mono audio
-            )  
+                ac=1,  # Mono audio
+            )
             .overwrite_output()
         )
 

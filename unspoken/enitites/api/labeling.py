@@ -6,12 +6,17 @@ from unspoken.enitites.enums.labeling_task_status import LabelingTaskStatus
 from unspoken.enitites.enums.labeling_segment_status import LabelingSegmentStatus
 
 
+class LabelingSpeakerResponse(BaseModel):
+    id: int
+    name: str
+
+
 class LabelingSegmentResponse(BaseModel):
     id: int
     start: float
     end: float
     text: str
-    speaker: str
+    speaker: LabelingSpeakerResponse
     status: LabelingSegmentStatus
 
     class Config:
@@ -24,6 +29,7 @@ class LabelingTaskResponse(BaseModel):
     file_name: str
     status: LabelingTaskStatus
     segments: List[LabelingSegmentResponse]
+    speakers: List[LabelingSpeakerResponse]
 
     class Config:
         from_attributes = True
@@ -34,4 +40,4 @@ class UpdateLabelingSegmentRequest(BaseModel):
     start: float
     end: float
     text: str
-    speaker: str
+    speaker: LabelingSpeakerResponse

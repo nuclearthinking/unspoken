@@ -9,7 +9,7 @@ from datetime import timezone
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, DeclarativeBase, relationship, sessionmaker, mapped_column, scoped_session
 
-from alembic import command
+import alembic.command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from unspoken.settings import settings
@@ -38,7 +38,7 @@ def apply_migrations() -> None:
 
         if current_rev != head_rev:
             logger.info(f'Current revision: {current_rev}, upgrading to: {head_rev}')
-            command.upgrade(alembic_cfg, 'head')
+            alembic.command.upgrade(alembic_cfg, 'head')
             logger.info('Migrations completed successfully.')
         else:
             logger.info(f'Database is already at head revision: {head_rev}. Skipping Alembic operations.')
@@ -160,6 +160,15 @@ class Message(Base):
     end_time: Mapped[float] = mapped_column(sa.Float, nullable=False)
 
 
+class LabelingSpeaker(Base):
+    __tablename__ = 'labeling_speaker'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    labeling_task_id: Mapped[int] = mapped_column(sa.ForeignKey('labeling_tasks.id'), nullable=False)
+    labeling_task: Mapped['LabelingTask'] = relationship('LabelingTask', back_populates='speakers')
+
+
 class LabelingTask(Base):
     __tablename__ = 'labeling_tasks'
 
@@ -180,6 +189,12 @@ class LabelingTask(Base):
         cascade='all, delete-orphan',
         lazy='joined',
     )
+    speakers: Mapped[list['LabelingSpeaker']] = relationship(
+        'LabelingSpeaker',
+        back_populates='labeling_task',
+        cascade='all, delete-orphan',
+        lazy='joined',
+    )
 
 
 class LabelingSegment(Base):
@@ -191,7 +206,8 @@ class LabelingSegment(Base):
     start: Mapped[float] = mapped_column(sa.Float, nullable=False)
     end: Mapped[float] = mapped_column(sa.Float, nullable=False)
     text: Mapped[str] = mapped_column(sa.Text, nullable=False)
-    speaker: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    speaker_id: Mapped[int] = mapped_column(sa.ForeignKey(LabelingSpeaker.id), nullable=False)
+    speaker: Mapped[LabelingSpeaker] = relationship(LabelingSpeaker, foreign_keys=[speaker_id], lazy='joined')
     status: Mapped[LabelingSegmentStatus] = mapped_column(
         sa.Enum(LabelingSegmentStatus, native_enum=False),
         nullable=False,
@@ -228,6 +244,19 @@ def create_labeling_task(
         return labeling_task
 
 
+def _get_or_create_labeling_speaker(
+    session: Session,
+    speaker_name: str,
+    labeling_task_id: int,
+) -> LabelingSpeaker:
+    speaker = session.query(LabelingSpeaker).filter_by(name=speaker_name, labeling_task_id=labeling_task_id).first()
+    if not speaker:
+        speaker = LabelingSpeaker(name=speaker_name, labeling_task_id=labeling_task_id)
+        session.add(speaker)
+        session.flush()  # To get the speaker id
+    return speaker
+
+
 def create_labeling_segments(
     labeling_task_id: int,
     segments: list[TranscriptionSegment],
@@ -236,12 +265,18 @@ def create_labeling_segments(
     session = session or Session()
     with session:
         for segment in segments:
+            speaker = _get_or_create_labeling_speaker(
+                session=session,
+                speaker_name=segment.speaker,
+                labeling_task_id=labeling_task_id,
+            )
+
             labeling_segment = LabelingSegment(
                 labeling_task_id=labeling_task_id,
                 start=segment.start,
                 end=segment.end,
                 text=segment.text,
-                speaker=segment.speaker,
+                speaker_id=speaker.id,
                 status=LabelingSegmentStatus.in_progress,
             )
             session.add(labeling_segment)
@@ -253,17 +288,22 @@ def create_labeling_segment(
     start_time: float,
     end_time: float,
     text: str,
-    speaker: str,
+    speaker_name: str,
     session: Session = None,
 ) -> LabelingSegment:
     session = session or Session()
     with session:
+        speaker = _get_or_create_labeling_speaker(
+            session=session,
+            speaker_name=speaker_name,
+            labeling_task_id=labeling_task_id,
+        )
         labeling_segment = LabelingSegment(
             labeling_task_id=labeling_task_id,
             start=start_time,
             end=end_time,
             text=text,
-            speaker=speaker,
+            speaker_id=speaker.id,
             status=LabelingSegmentStatus.in_progress,
         )
         session.add(labeling_segment)
