@@ -45,7 +45,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /app
 
-# Copy and install Python dependencies
+# Copy and install Python dependencies without project
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync -vv --frozen --no-dev --no-install-project 
@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Copy backend code
 COPY . .
 
-# Install Python dependencies
+# Install Python dependencies with project
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync -vv --frozen --no-dev
 

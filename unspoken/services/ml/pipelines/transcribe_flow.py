@@ -9,12 +9,30 @@ from unspoken.enitites.diarization import DiarizationResult
 from unspoken.enitites.transcription import TranscriptionResult
 from unspoken.enitites.speach_to_text import SpeachToTextResult
 from unspoken.services.ml.transcriber import Transcriber
+from unspoken.services.audio.converter import convert_to_wav
+from unspoken.enitites.enums.task_status import TaskStatus
+from unspoken.services.annotation.annotate_transcription import annotate_dtw
+from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
+
+import io
+import logging
+from pydub import AudioSegment
+from unspoken import exceptions
+from unspoken.services import db
+from unspoken.core.loader import prepare_models
+from unspoken.enitites.diarization import DiarizationResult
+from unspoken.enitites.transcription import TranscriptionResult
+from unspoken.enitites.speach_to_text import SpeachToTextResult
+from unspoken.services.ml.transcriber import Transcriber
 from unspoken.services.audio.converter import convert_to_wav, preprocess_audio
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.services.ml.speechbarin_diarizer import SpeechBrainDiarizer
-from unspoken.services.annotation.annotate_transcription import annotate, annotate_dtw
+from unspoken.services.db.base import LabelingTaskStatus, LabelingSegmentStatus
 
-logger = logging.getLogger('uvicorn')
+logger = logging.getLogger(__name__)
+
+
+logger = logging.getLogger(__name__)
 
 
 def clear_cuda_cache(func):
@@ -35,10 +53,22 @@ def _convert_audio(source_file_data: bytes):
     wav_data = convert_to_wav(source_file_data)
     return wav_data
 
+def convert_wav_to_mp3(wav_data: bytes) -> bytes:
+    """Convert WAV audio data to MP3 format."""
+    wav_audio = AudioSegment.from_wav(io.BytesIO(wav_data))
+    mp3_buffer = io.BytesIO()
+    wav_audio.export(mp3_buffer, format="mp3")
+    return mp3_buffer.getvalue()
 
 @clear_cuda_cache
 def _transcribe_audio(wav_data: bytes) -> SpeachToTextResult:
     result = Transcriber().transcribe(wav_data)
+    return result
+
+
+@clear_cuda_cache
+def _diarize_audio(wav_data: bytes) -> DiarizationResult:
+    result = PyanoteDiarizer().diarize(wav_data)
     return result
 
 
@@ -47,7 +77,6 @@ def annotate_transcription(
     diarization_result: DiarizationResult,
 ) -> TranscriptionResult:
     return annotate_dtw(stt_result, diarization_result)
-    return annotate(stt_result, diarization_result)
 
 
 def _save_to_database(
@@ -104,6 +133,28 @@ def _save_to_database(
         db.save_messages(messages_to_save, session=session)
     logger.info('Saved %s messages.', len(messages_to_save))
 
+def create_labeling_task(task_id: int, mp3_data: bytes, transcription_result: TranscriptionResult) -> None:
+    """Create a new labeling task with segments from the MP3 file and transcription result."""
+    with db.Session() as session:
+        task = db.get_task(task_id, session)
+        if not task or not task.transcript:
+            raise exceptions.TaskNotFoundError(f'Task with id: {task_id} was not found or has no transcript.')
+
+        labeling_task = db.create_labeling_task(
+            transcript_id=task.transcript.id,
+            audio_data=mp3_data,
+            file_name=f"{task.uploaded_file_name.rsplit('.', 1)[0]}.mp3",
+            session=session
+        )
+
+        db.create_labeling_segments(
+            labeling_task_id=labeling_task.id,
+            segments=transcription_result.messages,
+            session=session
+        )
+
+        logger.info(f'Created labeling task for task_id {task_id}')
+
 
 def transcribe_audio_flow(temp_file_id: int, task_id: int):
     logger.info('Initializing models.')
@@ -123,22 +174,25 @@ def transcribe_audio_flow(temp_file_id: int, task_id: int):
     try:
         db.update_task(task, status=TaskStatus.processing)
         logger.info('Converting audio for tmp_file_id %s.', temp_file_id)
-        wav_data = convert_to_wav(source_data=temp_file.read())
-
-        logger.info('Reducing noises ')
-        preprocessed_audio = preprocess_audio(wav_data=wav_data)
-
-        logger.info('Transcribing audio for task_id %s.', task_id)
-        transcription = _transcribe_audio(preprocessed_audio)
-
+        wav_data = _convert_audio(source_file_data=temp_file.read())
         logger.info('Diarizing audio for task_id %s.', task_id)
-        diarizer = SpeechBrainDiarizer()
-        diarized_transcription = diarizer.diarize_segments(preprocessed_audio, transcription)
-
+        diarization = _diarize_audio(wav_data)
+        logger.info('Transcribing audio for task_id %s.', task_id)
+        transcription = _transcribe_audio(wav_data)
+        logger.info('Combining results for task_id %s.', task_id)
+        annotated_transcription = annotate_transcription(stt_result=transcription, diarization_result=diarization)
         logger.info('Saving results for task_id %s.', task_id)
         _save_to_database(
             task_id=task_id,
-            transcription_result=diarized_transcription,
+            annotated_transcription=annotated_transcription,
+            diarization_result=diarization,
+            transcription_result=transcription,
+        )
+        mp3_audio = convert_wav_to_mp3(wav_data=wav_data)
+        create_labeling_task(
+            task_id=task_id,
+            mp3_data=mp3_audio,
+            transcription_result=annotated_transcription,
         )
         db.update_task(task, status=TaskStatus.completed)
         logger.info('Transcription flow completed for task %s.', task_id)

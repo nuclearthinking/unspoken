@@ -2,3 +2,8 @@
 resources/models/*
 *.tsbuildinfo
 .venv
+.aider*
+data/
+.ruff_cache/
+.ipynb_checkpoints/
+.vscode

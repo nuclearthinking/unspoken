@@ -20,3 +20,14 @@ class TaskNotFoundError(UnspokenException):
 
 class ModelNotFound(UnspokenException):
     """Raises when unable to find model info."""
+
+
+class NoDiarizedSegmentsError(UnspokenException):
+    """Raised when no valid segments found for diarization."""
+
+class LabelingTaskNotFound(UnspokenException):
+    """Raised when a labeling task cannot be found."""
+
+
+class UnableToMergeLabelingSegments(UnspokenException):
+    """Raise when there is incorrect request for merging segments."""

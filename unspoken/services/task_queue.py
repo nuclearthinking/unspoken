@@ -1,8 +1,7 @@
 import queue
+import logging
 import threading
 from typing import Callable
-
-import logging
 
 logger = logging.getLogger('uvicorn')
 

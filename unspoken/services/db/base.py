@@ -1,18 +1,24 @@
-import datetime
-import logging
 import os
+import json
+import logging
+import datetime
 import traceback
 from pathlib import Path
-import json
+
 import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship, scoped_session, sessionmaker
+from sqlalchemy.orm import Mapped, relationship, sessionmaker, mapped_column, scoped_session, declarative_base
+
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
+from unspoken.settings import settings
+from unspoken.exceptions import TranscriptNotFound
 from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.exceptions import TranscriptNotFound
-from unspoken.settings import settings
+from unspoken.enitites.enums.labeling_segment_status import LabelingSegmentStatus
+from unspoken.enitites.enums.labeling_task_status import LabelingTaskStatus
+from unspoken.enitites.transcription import TranscriptionSegment
+
 
 logger = logging.getLogger(__name__)
 
@@ -164,18 +170,133 @@ class LabelingTask(Base):
     __tablename__ = 'labeling_tasks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
-    text: Mapped[str] = mapped_column(sa.Text, nullable=False)
-    is_completed: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+    transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
+    transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
+    audio_data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
+    file_name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    status: Mapped[str] = mapped_column(
+        sa.Enum(LabelingTaskStatus, native_enum=False),
+        nullable=False,
+        default=LabelingTaskStatus.queued,
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+    segments: Mapped[list['LabelingSegment']] = relationship(
+        'LabelingSegment', back_populates='labeling_task', cascade='all, delete-orphan'
+    )
 
 
-class LabelingResult(Base):
-    __tablename__ = 'labeling_result'
+class LabelingSegment(Base):
+    __tablename__ = 'labeling_segments'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     labeling_task_id: Mapped[int] = mapped_column(sa.ForeignKey(LabelingTask.id), nullable=False)
-    labeling_task: Mapped[LabelingTask] = relationship(LabelingTask, foreign_keys=[labeling_task_id], lazy='joined')
+    labeling_task: Mapped[LabelingTask] = relationship(LabelingTask, back_populates='segments')
+    start: Mapped[float] = mapped_column(sa.Float, nullable=False)
+    end: Mapped[float] = mapped_column(sa.Float, nullable=False)
     text: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    speaker: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    status: Mapped[str] = mapped_column(
+        sa.Enum(LabelingSegmentStatus, native_enum=False),
+        nullable=False,
+        default=LabelingSegmentStatus.in_progress,
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+
+def get_labeling_task_by_task_id(task_id: int, session: Session = None) -> LabelingTask | None:
+    session = session or Session()
+    with session:
+        task = session.query(Task).filter(Task.id == task_id).first()
+        if task and task.transcript:
+            return session.query(LabelingTask).filter(LabelingTask.transcript_id == task.transcript.id).first()
+    return None
+
+
+def create_labeling_task(
+    transcript_id: int, audio_data: bytes, file_name: str, session: Session = None
+) -> LabelingTask:
+    session = session or Session()
+    with session:
+        labeling_task = LabelingTask(
+            transcript_id=transcript_id,
+            audio_data=audio_data,
+            file_name=file_name,
+            status=LabelingTaskStatus.queued,
+        )
+        session.add(labeling_task)
+        session.commit()
+        session.refresh(labeling_task)
+        return labeling_task
+
+
+def create_labeling_segments(
+    labeling_task_id: int, segments: list[TranscriptionSegment], session: Session = None
+) -> None:
+    session = session or Session()
+    with session:
+        for segment in segments:
+            labeling_segment = LabelingSegment(
+                labeling_task_id=labeling_task_id,
+                start=segment.start,
+                end=segment.end,
+                text=segment.text,
+                speaker=segment.speaker,
+                status=LabelingSegmentStatus.in_progress,
+            )
+            session.add(labeling_segment)
+        session.commit()
+
+
+def create_labeling_segment(
+    labeling_task_id: int,
+    start_time: float,
+    end_time: float,
+    text: str,
+    speaker: str,
+    session: Session = None,
+) -> LabelingSegment:
+    session = session or Session()
+    with session:
+        labeling_segment = LabelingSegment(
+            labeling_task_id=labeling_task_id,
+            start=start_time,
+            end=end_time,
+            text=text,
+            speaker=speaker,
+            status=LabelingSegmentStatus.in_progress,
+        )
+        session.add(labeling_segment)
+        session.commit()
+        session.refresh(labeling_segment)
+        return labeling_segment
+
+
+def get_labeling_task(task_id: int, session: Session = None) -> LabelingTask | None:
+    session = session or Session()
+    with session:
+        return session.query(LabelingTask).filter(LabelingTask.id == task_id).first()
+
+
+def update_labeling_task_status(task_id: int, status: LabelingTaskStatus, session: Session = None) -> None:
+    session = session or Session()
+    with session:
+        labeling_task = session.query(LabelingTask).filter(LabelingTask.id == task_id).first()
+        if labeling_task:
+            labeling_task.status = status.value
+            labeling_task.updated_at = datetime.datetime.utcnow()
+            session.commit()
+
+
+def update_labeling_segment(segment_id: int, **kwargs) -> None:
+    with Session() as session:
+        segment = session.query(LabelingSegment).filter(LabelingSegment.id == segment_id).first()
+        if segment:
+            for key, value in kwargs.items():
+                setattr(segment, key, value)
+            segment.updated_at = datetime.datetime.utcnow()
 
 
 def create_speaker(name: str, task_id: int, session: Session = None) -> Speaker:
@@ -252,7 +373,7 @@ def save_speach_to_text_result(id_, result: dict, session: Session = None) -> No
         transcript = session.execute(query).scalar_one_or_none()
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
-        
+
         transcript.speach_to_text_result = result
         session.commit()
 

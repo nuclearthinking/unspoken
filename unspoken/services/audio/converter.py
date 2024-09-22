@@ -1,7 +1,7 @@
+import io
 import logging
 from tempfile import NamedTemporaryFile
-import io
-import numpy as np
+
 import librosa
 import soundfile as sf
 import noisereduce as nr

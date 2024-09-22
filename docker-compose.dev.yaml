@@ -1,8 +1,7 @@
 services:
-  api:
-    build:
-      target: development
-    command: uvicorn unspoken.app:app --reload --host 0.0.0.0 --port 8000
+  app:
+    build: .
+    command: /bin/sh -c "uv run uvicorn unspoken.app:app --reload --host ${HOST} --port ${PORT}"    
     develop:
       watch:
         - path: ./unspoken

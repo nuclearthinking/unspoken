@@ -1,13 +1,14 @@
-import dataclasses
 import json
 import logging
+import dataclasses
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
+from speechbrain.inference import EncoderClassifier
 
-from unspoken.enitites.enums.ml_models import Model
-from unspoken.exceptions import ModelNotFound, UnspokenException
 from unspoken.settings import settings
+from unspoken.exceptions import ModelNotFound, UnspokenException
+from unspoken.enitites.enums.ml_models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +40,19 @@ def load_model(model: Model):
         logger.info(f'Model {model.value} already exists, skipping.')
         return
     logger.info(f'Downloading model {model.value}.')
-    snapshot_download(
-        repo_id=model_info.repo_id,
-        revision=model_info.revision,
-        local_dir=model_path,
-        local_dir_use_symlinks=False,
-    )
+    if model == Model.speechbrain:
+        EncoderClassifier.from_hparams(
+            source=model_info.repo_id,
+            savedir=model_path,
+            download_only=True,
+        )
+    else:
+        snapshot_download(
+            repo_id=model_info.repo_id,
+            revision=model_info.revision,
+            local_dir=model_path,
+            local_dir_use_symlinks=False,
+        )
     logger.info(f'Model {model.value} downloaded.')
 
 

@@ -5,12 +5,9 @@ import magic
 from fastapi import APIRouter, UploadFile, HTTPException
 
 from unspoken.services import db
-
 from unspoken.enitites.api.upload import UploadResponse
-
-from unspoken.enitites.enums.mime_types import MimeType
 from unspoken.services.task_queue import add_task
-
+from unspoken.enitites.enums.mime_types import MimeType
 
 upload_router = APIRouter(
     prefix='/upload',

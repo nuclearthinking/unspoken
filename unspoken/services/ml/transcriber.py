@@ -1,14 +1,14 @@
-import logging
 import time
+import logging
 from io import BytesIO
 
 import torch
 from faster_whisper import WhisperModel
 
-from unspoken.core.singleton import SingletonMeta
-from unspoken.enitites.enums.ml_models import Model
-from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
 from unspoken.settings import settings
+from unspoken.core.singleton import SingletonMeta
+from unspoken.enitites.speach_to_text import SpeachToTextResult, SpeachToTextSegment
+from unspoken.enitites.enums.ml_models import Model
 
 logger = logging.getLogger(__name__)
 

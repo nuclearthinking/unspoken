@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from unspoken.enitites.api.messages import MessageResponse, UpdateMessageSpeakerRequest
 from unspoken.services import db
+from unspoken.enitites.api.messages import MessageResponse, UpdateMessageSpeakerRequest
 
 messages_router = APIRouter(prefix='/messages', tags=['Messages'])
 

@@ -6,7 +6,7 @@ class SpeachToTextSegment(BaseModel):
     start: float
     end: float
     text: str
-    speaker: str = ""
+    speaker: str = ''
 
 
 class SpeachToTextResult(BaseModel):

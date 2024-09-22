@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import Field, BaseModel
 
 
 class TranscriptionSegment(BaseModel):
@@ -12,3 +12,4 @@ class TranscriptionResult(BaseModel):
     messages: list[TranscriptionSegment] = Field(default_factory=list)
     file_name: str | None = None
     duration: float | None = None
+    speakers: list[str] = Field(default_factory=list)

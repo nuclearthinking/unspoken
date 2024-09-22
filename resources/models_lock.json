@@ -8,7 +8,7 @@
     "revision": "020ba00d0bf59af9e3ae1225ed629e6d10796563"
   },
   "speechbrain": {
-    "repo_id": "nuclearthinking/diarization",
-    "revision": "020ba00d0bf59af9e3ae1225ed629e6d10796563"
+    "repo_id": "speechbrain/spkrec-ecapa-voxceleb",
+    "revision": "eac27266f68caa806381260bd44ace38b136c76a"
   }
 }

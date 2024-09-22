@@ -28,7 +28,9 @@ dependencies = [
 [tool.uv]
 dev-dependencies = [
     "isort>=5.13.2",
+    "jupyter>=1.1.1",
     "ruff>=0.6.5",
+    "seaborn>=0.13.2",
 ]
 
 [tool.ruff]
@@ -52,4 +54,4 @@ line-ending = "auto"
 length_sort = true
 multi_line_output = 3
 line_length = 120
-extend_skip = ["alembic/versions"]
+extend_skip = ["alembic/versions", "resources"]

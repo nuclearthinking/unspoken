@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
 
-from unspoken.enitites.api.tasks import TaskResponse
-from unspoken.enitites.enums.task_status import TaskStatus
-from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
 from unspoken.services import db
+from unspoken.enitites.api.tasks import TaskResponse
+from unspoken.enitites.transcription import TranscriptionResult, TranscriptionSegment
+from unspoken.enitites.enums.task_status import TaskStatus
 
 tasks_router = APIRouter(
     prefix='/task',
@@ -44,7 +44,6 @@ def squeeze_messages(messages: list[TranscriptionSegment]) -> list[Transcription
             continue
 
         if last_message.speaker == message.speaker:
-
             last_message.end = message.end
 
             if last_message.text[-1] in ('.', ',', '!', '?', ';', ':'):

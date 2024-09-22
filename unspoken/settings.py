@@ -8,21 +8,21 @@ class _Settings(BaseSettings):
     compute_type: str = 'auto'
 
     # HUGGINGFACE SETTINGS
-    hf_token: str
+    # hf_token: str
 
     # DB SETTINGS
-    db_host: str = '0.0.0.0'
+    db_host: str = 'localhost'
     db_port: int = 5432
     db_name: str = 'unspoken'
-    db_user: str
-    db_password: str
+    db_user: str = 'unspoken'
+    db_password: str = 'changeme'
 
     # RABBITMQ SETTINGS
     rabbitmq_host: str = '0.0.0.0'
     rabbitmq_port: int = 5672
     rabbitmq_vhost: str = '/'
-    rabbitmq_user: str
-    rabbitmq_password: str
+    # rabbitmq_user: str
+    # rabbitmq_password: str
     transcribe_audio_queue: str = 'transcribe_audio'
     transcribe_audio_routing_key: str = 'transcribe.#'
 
@@ -33,5 +33,6 @@ class _Settings(BaseSettings):
     models_lock_path: str = 'resources/models_lock.json'
 
     frontend_build_path: str = 'frontend/dist'
+
 
 settings = _Settings()

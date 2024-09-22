@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from unspoken.core.singleton import SingletonABCMeta
-from unspoken.enitites.diarization import DiarizationResult, SpeakerSegment
+from unspoken.enitites.diarization import SpeakerSegment, DiarizationResult
 
 
 class BaseDiarizer(metaclass=SingletonABCMeta):
