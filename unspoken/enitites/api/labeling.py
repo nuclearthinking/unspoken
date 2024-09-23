@@ -10,6 +10,9 @@ class LabelingSpeakerResponse(BaseModel):
     id: int
     name: str
 
+    class Config:
+        from_attributes = True
+
 
 class LabelingSegmentResponse(BaseModel):
     id: int
@@ -25,7 +28,6 @@ class LabelingSegmentResponse(BaseModel):
 
 class LabelingTaskResponse(BaseModel):
     id: int
-    transcript_id: int
     file_name: str
     status: LabelingTaskStatus
     segments: List[LabelingSegmentResponse]

@@ -1,5 +1,6 @@
 import io
 import logging
+from tempfile import NamedTemporaryFile
 
 import ffmpeg
 import librosa
@@ -11,44 +12,56 @@ logger = logging.getLogger(__name__)
 
 def _convert_to_wav(source_data: bytes) -> bytes:
     try:
-        input_stream = ffmpeg.input('pipe:0')
-        output_stream = (
-            ffmpeg.filter(input_stream, 'loudnorm')
-            .output(
-                'pipe:1',
-                format='wav',
-                acodec='pcm_s16le',  # 16-bit depth is sufficient
-                ar=16000,  # 16 kHz sample rate
-                ac=1,  # Mono audio
-            )
-            .overwrite_output()
-        )
+        with (
+            NamedTemporaryFile(delete=False, suffix='.tmp') as temp_input,
+            NamedTemporaryFile(delete=False, suffix='.wav') as temp_output,
+        ):
+            temp_input.write(source_data)
+            temp_input_path = temp_input.name
+            temp_output_path = temp_output.name
 
-        out, _ = output_stream.run(input=source_data, capture_stdout=True, capture_stderr=True)
-        return out
+            (
+                ffmpeg.input(temp_input_path)
+                .filter('loudnorm')
+                .output(temp_output_path, format='wav', acodec='pcm_s16le', ar=16000, ac=1)
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+
+            with open(temp_output_path, 'rb') as output_file:
+                out = output_file.read()
+
+            return out
 
     except ffmpeg.Error as e:
-        logger.error(f'FFmpeg error: {e.stderr.decode()}')
+        logger.error(f'FFmpeg error: {e.stderr.decode() if e.stderr else str(e)}')
         raise
 
 
 def _convert_wav_to_mp3(wav_data: bytes, bitrate: str = '128k') -> bytes:
     try:
-        # Create an input stream from the WAV data
-        input_stream = ffmpeg.input('pipe:0', format='wav')
+        with (
+            NamedTemporaryFile(delete=False, suffix='.wav') as temp_input,
+            NamedTemporaryFile(delete=False, suffix='.mp3') as temp_output,
+        ):
+            temp_input.write(wav_data)
+            temp_input_path = temp_input.name
+            temp_output_path = temp_output.name
 
-        # Set up the output stream with MP3 encoding
-        output_stream = input_stream.output(
-            'pipe:1', format='mp3', acodec='libmp3lame', audio_bitrate=bitrate
-        ).overwrite_output()
+            (
+                ffmpeg.input(temp_input_path)
+                .output(temp_output_path, format='mp3', acodec='libmp3lame', audio_bitrate=bitrate)
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
 
-        # Run the FFmpeg command
-        out, _ = output_stream.run(input=wav_data, capture_stdout=True, capture_stderr=True)
+            with open(temp_output_path, 'rb') as output_file:
+                out = output_file.read()
 
-        return out
+            return out
 
     except ffmpeg.Error as e:
-        logger.error(f'FFmpeg error: {e.stderr.decode()}')
+        logger.error(f'FFmpeg error: {e.stderr.decode() if e.stderr else str(e)}')
         raise
 
 
@@ -110,3 +123,12 @@ class AudioService:
             if 'Invalid argument' in error_message or 'Error selecting filters' in error_message:
                 raise ValueError(f'Invalid start or end time: {error_message}')
             raise
+
+
+with open('data/interview.mp4', 'rb') as f:
+    file = f.read()
+
+wav_data = _convert_to_wav(source_data=file)
+
+with open('result.wav', 'wb') as wf:
+    wf.write(wav_data)

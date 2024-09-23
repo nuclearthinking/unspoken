@@ -173,8 +173,8 @@ class LabelingTask(Base):
     __tablename__ = 'labeling_tasks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
-    transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
+    task_id: Mapped[int] = mapped_column(sa.ForeignKey(Task.id), nullable=False)
+    task: Mapped[Task] = relationship(Task, foreign_keys=[task_id], lazy='joined')
     audio_data: Mapped[bytes] = mapped_column(sa.LargeBinary, nullable=False)
     file_name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     status: Mapped[LabelingTaskStatus] = mapped_column(
@@ -218,10 +218,7 @@ class LabelingSegment(Base):
 def get_labeling_task_by_task_id(task_id: int, session: Session = None) -> LabelingTask | None:
     session = session or Session()
     with session:
-        task = session.query(Task).filter(Task.id == task_id).first()
-        if task and task.transcript:
-            return session.query(LabelingTask).filter(LabelingTask.transcript_id == task.transcript.id).first()
-    return None
+        return session.query(LabelingTask).filter(LabelingTask.task_id == task_id).first()
 
 
 def create_labeling_task(

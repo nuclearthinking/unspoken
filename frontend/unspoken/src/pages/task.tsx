@@ -56,11 +56,7 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<TaskRespon
     if (!taskId || isNaN(parseInt(taskId))) {
         throw new Error('Invalid taskId');
     }
-    const response = await fetch(API.getTask(parseInt(taskId)));
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
+    return await API.getTask(parseInt(taskId))
 }
 
 export default function Task() {
@@ -82,11 +78,8 @@ export default function Task() {
 
         const checkTaskStatus = async () => {
             try {
-                const response = await fetch(API.getTask(taskData.id));
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const updatedData: TaskResponse = await response.json();
+                const updatedData: TaskResponse = await API.getTask(taskData.id);
+
                 setTaskData(updatedData);
 
                 if (updatedData.status === TaskStatus.completed) {

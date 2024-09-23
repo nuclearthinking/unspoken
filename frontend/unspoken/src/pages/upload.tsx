@@ -16,21 +16,9 @@ export default function Home() {
         setUploadSuccess(false)
 
         try {
-            const formData = new FormData()
-            formData.append('file', file)
-
-            const response = await fetch(API.upload, {
-                method: 'POST',
-                body: formData,
-            })
-
-            if (!response.ok) {
-                throw new Error('Upload failed')
-            }
-
-            const data = await response.json()
-            setUploadSuccess(true)
-            navigate(`/task/${data.task_id}`)
+            const response = await API.upload(file);
+            setUploadSuccess(true);
+            navigate(`/task/${response.task_id}`);
         } catch (error) {
             setUploadError('Failed to upload file. Please try again.')
             console.error('Upload error:', error)

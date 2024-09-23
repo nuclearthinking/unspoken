@@ -35,8 +35,7 @@ def clear_cuda_cache(func):
 
 
 def _convert_audio(source_file_data: bytes):
-    wav_data = AudioService(source_file_data).to_wav()
-    return wav_data
+    return AudioService(source_file_data).to_wav()
 
 
 def convert_wav_to_mp3(wav_data: bytes) -> bytes:

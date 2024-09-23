@@ -1,9 +1,9 @@
 import { createBrowserRouter,  RouterProvider , LoaderFunctionArgs} from 'react-router-dom'
 import Upload from '@/pages/upload'
 import Task, { loader as taskLoader } from '@/pages/task'
-import Labeling from '@/pages/labeling'
+import LabelingList, { loader as labelingLoader } from '@/pages/labeling'
 import ErrorPage from '@/pages/error'
-import { TaskResponse } from '@/types/api'
+import { TaskResponse, LabelingTaskResponse } from '@/types/api'
 
 const router = createBrowserRouter([
   {
@@ -19,7 +19,8 @@ const router = createBrowserRouter([
   },
   {
     path: "/labeling/:taskId",
-    element: <Labeling />,
+    element: <LabelingList />,
+    loader: labelingLoader as (args: LoaderFunctionArgs) => Promise<LabelingTaskResponse>,
     errorElement: <ErrorPage />,
   },
 ]);

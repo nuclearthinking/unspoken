@@ -23,5 +23,5 @@ from .base import (
     create_labeling_segments,
     save_transcription_result,
     save_speach_to_text_result,
-    get_labeling_task_by_task_id,
+    get_labeling_task_by_task_id
 )
