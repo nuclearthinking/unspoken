@@ -8,8 +8,6 @@ Convert audio to text-conversation separated by speakers.
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Building the Frontend (Optional)](#building-the-frontend-optional)
 - [Contributing](#contributing)
 
 ## Introduction
@@ -34,54 +32,20 @@ diarization.
     git clone https://github.com/nuclearthinking/unspoken.git
     cd unspoken
     ```
-2. Build and run application with script:
+2. Run application with docker compose:
     ```bash
-    chmod +x deploy.sh # make file executable
-    ./deploy.sh 
+    docker compose up -d
     ```
 
-![img_1.png](docs/img_1.png)
-![img_2.png](docs/img_2.png)
+### Important!! Keep in mind that, on first run it will download large binaries models from huggingface, therefore it will take some time.
 
-## Usage
+You can check progress using `docker log` command on app container. 
 
-1. **Upload an Audio File**:
-    ```bash
-    curl --location 'http://0.0.0.0:8000/upload/audio' --form 'file=@"/path/to/audio_file.m4a"'
-    ```
-2. **Check Task Status**:
-    ```bash
-    curl --location 'http://0.0.0.0:8000/task/{task_id}'
-    ```
-   **Response**:
-    ```json
-    {
-      "id": 21,
-      "status": "completed",
-      "file_name": "file_name",
-      "speakers": ["speaker_0", "speaker_1"],
-      "messages": [
-        {"start": 0.0, "end": 3.62, "text": "Message 1", "speaker": "speaker_0"},
-        {"start": 6.96, "end": 15.0, "text": "Message 2", "speaker": "speaker_1"}
-      ]
-    }
-    ```
 
-## Building the Frontend (Optional)
+![img_2.png](docs/img_4.png)
+![img_1.png](docs/img.png)
+![img_2.png](docs/img_3.png)
 
-1. **Install Dependencies**:
-    ```bash
-    cd frontend/unspoken
-    npm install
-    ```
-2. **Build Frontend**:
-    ```bash
-    npm run build
-    ```
-3. **Run Frontend**:
-    ```bash
-    docker-compose --profile frontend up
-    ```
 
 ## Contributing
 
