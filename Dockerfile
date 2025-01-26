@@ -63,4 +63,4 @@ COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
 # Expose the FastAPI port
 EXPOSE ${PORT:-80}
 
-CMD ["/bin/sh", "-c", "uv run gunicorn unspoken.app:app -w 2 -b ${HOST:-0.0.0.0}:${PORT:-80} -k uvicorn.workers.UvicornWorker"]
+CMD ["/bin/sh", "-c", "uv run gunicorn unspoken.app:app -w 1 -b ${HOST:-0.0.0.0}:${PORT:-80} -k uvicorn.workers.UvicornWorker"]
