@@ -26,7 +26,21 @@ def apply_migrations() -> None:
         script = ScriptDirectory.from_config(alembic_cfg)
 
         with engine.connect() as connection:
-            current_rev = connection.execute(sa.text('SELECT version_num FROM alembic_version')).scalar()
+            table_exists_query = """
+                        SELECT COUNT(*) 
+                        FROM information_schema.tables 
+                        WHERE table_name = 'alembic_version'
+                        """
+            table_exists = connection.execute(sa.text(table_exists_query)).scalar() > 0
+
+            if table_exists:
+                current_rev = connection.execute(
+                    sa.text("SELECT version_num FROM alembic_version")
+                ).scalar()
+                logger.info(f'Found existing database schema with revision: {current_rev}')
+            else:
+                logger.warning('alembic_version table not found. Assuming clean database.')
+                current_rev = None
 
         head_rev = script.get_current_head()
 
