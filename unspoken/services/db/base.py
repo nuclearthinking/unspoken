@@ -92,7 +92,6 @@ Base.query = Session.query_property()
 
 
 def setup() -> None:
-    Base.metadata.create_all(checkfirst=True, bind=engine)
     apply_migrations()
 
 
