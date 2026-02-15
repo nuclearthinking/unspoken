@@ -29,6 +29,11 @@ export default function Home() {
             }
 
             const data = await response.json()
+            if (data.owner_token) {
+                const stored = JSON.parse(localStorage.getItem('task_tokens') || '{}')
+                stored[data.task_id] = data.owner_token
+                localStorage.setItem('task_tokens', JSON.stringify(stored))
+            }
             setUploadSuccess(true)
             navigate(`/task/${data.task_id}`)
         } catch (error) {

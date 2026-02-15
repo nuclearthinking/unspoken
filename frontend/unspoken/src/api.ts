@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${protocol}//${hostna
 export const API = {
   upload: `${API_BASE_URL}/api/upload/media`,
   getTask: (id: number) => `${API_BASE_URL}/api/task/${id}/`,
+  deleteTask: (id: number) => `${API_BASE_URL}/api/task/${id}/`,
   updateSpeakerName: (speakerId: number) => `${API_BASE_URL}/api/speakers/${speakerId}/name`,
   updateMessageSpeaker: (messageId: number) => `${API_BASE_URL}/api/messages/${messageId}/speaker`,
 };

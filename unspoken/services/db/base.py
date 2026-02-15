@@ -1,11 +1,13 @@
 import datetime
+import json
 import logging
 import os
 import traceback
 from pathlib import Path
-import json
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship, scoped_session, sessionmaker
+
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -34,9 +36,7 @@ def apply_migrations() -> None:
             table_exists = connection.execute(sa.text(table_exists_query)).scalar() > 0
 
             if table_exists:
-                current_rev = connection.execute(
-                    sa.text("SELECT version_num FROM alembic_version")
-                ).scalar()
+                current_rev = connection.execute(sa.text('SELECT version_num FROM alembic_version')).scalar()
                 logger.info(f'Found existing database schema with revision: {current_rev}')
             else:
                 logger.warning('alembic_version table not found. Assuming clean database.')
@@ -129,13 +129,15 @@ class TempFile(Base):
     def delete(self) -> None:
         path = Path(settings.temp_files_dir) / self.file_name
         logger.info('Deleting file %s', str(path))
-        os.remove(Path(settings.temp_files_dir) / self.file_name)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            logger.warning('File %s was already removed from disk.', str(path))
         if path.exists():
-            logger.warning('File %s still exists after delete', str(path))
+            logger.warning('File %s still exists after delete.', str(path))
         with Session() as s:
             s.delete(self)
             s.commit()
-            return
 
 
 class Task(Base):
@@ -148,6 +150,7 @@ class Task(Base):
         default=TaskStatus.queued,
     )
     uploaded_file_name: Mapped[str] = mapped_column(sa.String(255), nullable=True)
+    owner_token_hash: Mapped[str] = mapped_column(sa.String(64), nullable=True)
     transcript_id: Mapped[int] = mapped_column(sa.ForeignKey(Transcript.id), nullable=False)
     transcript: Mapped[Transcript] = relationship(Transcript, foreign_keys=[transcript_id], lazy='joined')
 
@@ -192,20 +195,35 @@ class LabelingResult(Base):
 
 
 def create_speaker(name: str, task_id: int, session: Session = None) -> Speaker:
+    _own_session = session is None
     session = session or Session()
-    with session:
+    try:
         speaker = Speaker(name=name, task_id=task_id)
         session.add(speaker)
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
         session.refresh(speaker)
         return speaker
+    finally:
+        if _own_session:
+            session.close()
 
 
 def save_messages(messages: list[Message], session: Session = None) -> None:
+    _own_session = session is None
     session = session or Session()
-    with session:
-        [session.add(m) for m in messages]
-        session.commit()
+    try:
+        for m in messages:
+            session.add(m)
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
+    finally:
+        if _own_session:
+            session.close()
 
 
 def create_new_task(**kwargs) -> Task:
@@ -235,9 +253,10 @@ def get_temp_file(id_: int) -> TempFile | None:
 
 
 def get_task(id_: int, session: Session = None, detach: bool = False) -> Task | None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Task).where(Task.id == id_)
-    with session:
+    try:
+        query = sa.select(Task).where(Task.id == id_)
         task = session.execute(query).scalar_one_or_none()
         if task is None:
             return None
@@ -245,108 +264,179 @@ def get_task(id_: int, session: Session = None, detach: bool = False) -> Task | 
         if detach:
             session.expunge(task)
         return task
+    finally:
+        if _own_session:
+            session.close()
 
 
 def update_task(task: Task, session: Session = None, **kwargs) -> Task:
+    _own_session = session is None
     session = session or Session()
-    with session:
+    try:
         session.add(task)
         logger.debug('Updating task %s with properties %s', task, kwargs)
         for key, value in kwargs.items():
             setattr(task, key, value)
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
         return task
+    finally:
+        if _own_session:
+            session.close()
 
 
 def save_speach_to_text_result(id_, result: dict, session: Session = None) -> None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Transcript).where(Transcript.id == id_)
-    with session:
+    try:
+        query = sa.select(Transcript).where(Transcript.id == id_)
         transcript = session.execute(query).scalar_one_or_none()
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
-        
         transcript.speach_to_text_result = result
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
+    finally:
+        if _own_session:
+            session.close()
 
 
 def save_diarization_result(id_, result: dict, session: Session = None) -> None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Transcript).where(Transcript.id == id_)
-    with session:
+    try:
+        query = sa.select(Transcript).where(Transcript.id == id_)
         transcript = session.execute(query).scalar_one_or_none()
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
         transcript.diarization_result = result
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
+    finally:
+        if _own_session:
+            session.close()
 
 
 def save_transcription_result(id_, result: dict, session: Session = None) -> None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Transcript).where(Transcript.id == id_)
-    with session:
+    try:
+        query = sa.select(Transcript).where(Transcript.id == id_)
         transcript = session.execute(query).scalar_one_or_none()
         if not transcript:
             raise TranscriptNotFound(f'Transcript with id {id_} not found.')
         transcript.transcription_result = result
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
+    finally:
+        if _own_session:
+            session.close()
 
 
 def get_message(id_: int, session: Session = None) -> Message | None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Message).where(Message.id == id_)
-    with session:
+    try:
+        query = sa.select(Message).where(Message.id == id_)
         message = session.execute(query).scalar_one_or_none()
-        if message is None:
-            return None
         return message
+    finally:
+        if _own_session:
+            session.close()
 
 
 def get_speaker(id_: int, session: Session = None) -> Speaker | None:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Speaker).where(Speaker.id == id_)
-    with session:
+    try:
+        query = sa.select(Speaker).where(Speaker.id == id_)
         speaker = session.execute(query).scalar_one_or_none()
-        if speaker is None:
-            return None
         return speaker
+    finally:
+        if _own_session:
+            session.close()
 
 
 def update_speaker(speaker: Speaker, session: Session = None, **kwargs) -> Speaker:
+    _own_session = session is None
     session = session or Session()
-    with session:
+    try:
         session.add(speaker)
         logger.debug('Updating speaker %s with properties %s', speaker, kwargs)
         for key, value in kwargs.items():
             setattr(speaker, key, value)
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
         session.refresh(speaker)
         return speaker
+    finally:
+        if _own_session:
+            session.close()
 
 
 def get_task_speakers(task_id, session: Session = None) -> list[Speaker]:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Speaker).where(Speaker.task_id == task_id)
-    with session:
+    try:
+        query = sa.select(Speaker).where(Speaker.task_id == task_id)
         speakers = session.execute(query).scalars().all()
         return list(speakers)
+    finally:
+        if _own_session:
+            session.close()
 
 
 def update_message(message: Message, session: Session = None, **kwargs) -> Message:
+    _own_session = session is None
     session = session or Session()
-    with session:
+    try:
         session.add(message)
         logger.debug('Updating message %s with properties %s', message, kwargs)
         for key, value in kwargs.items():
             setattr(message, key, value)
-        session.commit()
+        if _own_session:
+            session.commit()
+        else:
+            session.flush()
         session.refresh(message)
         return message
+    finally:
+        if _own_session:
+            session.close()
 
 
 def get_task_messages(task_id, session: Session = None) -> list[Message]:
+    _own_session = session is None
     session = session or Session()
-    query = sa.select(Message).where(Message.task_id == task_id)
-    with session:
+    try:
+        query = sa.select(Message).where(Message.task_id == task_id)
         messages = session.execute(query).scalars().all()
         return list(messages)
+    finally:
+        if _own_session:
+            session.close()
+
+
+def delete_task(task_id: int) -> None:
+    with Session() as s:
+        task = s.execute(sa.select(Task).where(Task.id == task_id)).scalar_one_or_none()
+        if task is None:
+            return
+        transcript_id = task.transcript_id
+        s.execute(sa.delete(Message).where(Message.task_id == task_id))
+        s.execute(sa.delete(Speaker).where(Speaker.task_id == task_id))
+        s.execute(sa.delete(Task).where(Task.id == task_id))
+        if transcript_id:
+            s.execute(sa.delete(Transcript).where(Transcript.id == transcript_id))
+        s.commit()
+        logger.info('Deleted task %s and all associated data.', task_id)

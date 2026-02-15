@@ -9,12 +9,14 @@ logger = logging.getLogger(__name__)
 def _to_segment(audio_data: bytes, format_: str | None = 'wav') -> AudioSegment:
     with NamedTemporaryFile('w+b') as file:
         file.write(audio_data)
+        file.flush()
         return AudioSegment.from_file(file.name, format=format_)
 
 
 def _from_segment(segment: AudioSegment, format_: str = 'wav', **kwargs) -> bytes:
     with NamedTemporaryFile('w+b') as file:
         segment.export(file.name, format=format_, **kwargs)
+        file.seek(0)
         return file.read()
 
 

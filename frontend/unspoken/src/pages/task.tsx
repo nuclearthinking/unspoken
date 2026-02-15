@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { useLoaderData, LoaderFunctionArgs } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react'
+import { useLoaderData, useNavigate, Link, LoaderFunctionArgs } from 'react-router-dom';
 import { API } from '@/api';
 import { TaskResponse, TaskStatus } from '@/types/api';
 import { AlertCircle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Header } from '@/components/header';
 
@@ -18,6 +19,33 @@ interface DisplayMessage {
     timestamp: string;
     speaker: string;
     text: string;
+}
+
+function getTaskToken(taskId: string | number): string | null {
+    try {
+        const stored = JSON.parse(localStorage.getItem('task_tokens') || '{}');
+        return stored[taskId] || null;
+    } catch {
+        return null;
+    }
+}
+
+function removeTaskToken(taskId: string | number): void {
+    try {
+        const stored = JSON.parse(localStorage.getItem('task_tokens') || '{}');
+        delete stored[taskId];
+        localStorage.setItem('task_tokens', JSON.stringify(stored));
+    } catch {
+        // ignore
+    }
+}
+
+function buildHeaders(taskId: string | number): HeadersInit {
+    const token = getTaskToken(taskId);
+    if (token) {
+        return { 'X-Task-Token': token };
+    }
+    return {};
 }
 
 const formatTime = (seconds: number): string => {
@@ -54,21 +82,31 @@ const MessageRow = ({ message }: { message: DisplayMessage }) => {
 export async function loader({ params }: LoaderFunctionArgs): Promise<TaskResponse> {
     const taskId = params.taskId;
     if (!taskId || isNaN(parseInt(taskId))) {
-        throw new Error('Invalid taskId');
+        throw new Response('Invalid task ID', { status: 400 });
     }
-    const response = await fetch(API.getTask(parseInt(taskId)));
+    const response = await fetch(API.getTask(parseInt(taskId)), {
+        headers: buildHeaders(taskId),
+    });
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Response(
+            response.status === 404
+                ? 'Task not found'
+                : 'Failed to load task',
+            { status: response.status }
+        );
     }
     return response.json();
 }
 
 export default function Task() {
     const data = useLoaderData() as TaskResponse;
+    const navigate = useNavigate();
     const [taskData, setTaskData] = useState<TaskResponse>(data);
     const [isLoading, setIsLoading] = useState(taskData.status === TaskStatus.queued || taskData.status === TaskStatus.processing);
     const [messages, setMessages] = useState<DisplayMessage[]>(convertToDisplayMessages(taskData.messages));
     const [error, setError] = useState(taskData.status === TaskStatus.failed)
+    const [notFound, setNotFound] = useState(false)
+    const [isOwned, setIsOwned] = useState(data.is_owned);
 
     const [audioInfo] = useState<AudioInfo>({
         title: data.file_name || "Team Meeting - Q2 Planning",
@@ -82,12 +120,21 @@ export default function Task() {
 
         const checkTaskStatus = async () => {
             try {
-                const response = await fetch(API.getTask(taskData.id));
+                const response = await fetch(API.getTask(taskData.id), {
+                    headers: buildHeaders(taskData.id),
+                });
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        setNotFound(true);
+                        setIsLoading(false);
+                        clearInterval(intervalId);
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const updatedData: TaskResponse = await response.json();
                 setTaskData(updatedData);
+                setIsOwned(updatedData.is_owned);
 
                 if (updatedData.status === TaskStatus.completed) {
                     setIsLoading(false);
@@ -102,7 +149,7 @@ export default function Task() {
                 }
             } catch (error) {
                 console.error("Error checking task status:", error);
-                setError(true)
+                setError(true);
             }
         };
 
@@ -115,6 +162,19 @@ export default function Task() {
         };
     }, [isLoading, taskData.id]);
 
+    const handleDeleteTask = useCallback(async () => {
+        const token = getTaskToken(taskData.id);
+        if (!token) throw new Error('No ownership token found');
+        const response = await fetch(API.deleteTask(taskData.id), {
+            method: 'DELETE',
+            headers: { 'X-Task-Token': token },
+        });
+        if (!response.ok) {
+            throw new Error(`Delete failed: ${response.status}`);
+        }
+        removeTaskToken(taskData.id);
+        navigate('/');
+    }, [taskData.id, navigate]);
 
     const exportTranscript = () => {
         return  messages.map(m => `[${m.timestamp}] ${m.speaker}: ${m.text}`).join('\n')
@@ -125,11 +185,26 @@ export default function Task() {
             <Header
                 showCopyTranscript={!isLoading}
                 onCopyTranscript={exportTranscript}
+                showDelete={isOwned && !isLoading}
+                onDeleteTask={handleDeleteTask}
                 isLoading={isLoading}
                 error={error}
             />
             <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 min-w-[640px]">
-                {isLoading ? (
+                {notFound ? (
+                    <div className="flex flex-1 items-center justify-center py-20">
+                        <div className="max-w-md w-full space-y-6 text-center">
+                            <div className="text-6xl font-bold text-muted-foreground/50">404</div>
+                            <h2 className="text-2xl font-bold">Task not found</h2>
+                            <p className="text-muted-foreground">
+                                This task may have been deleted or never existed. If you had this page open, the task was likely removed.
+                            </p>
+                            <Button asChild className="w-full">
+                                <Link to="/">Go back home</Link>
+                            </Button>
+                        </div>
+                    </div>
+                ) : isLoading ? (
                     <div className="max-w-4xl mx-auto space-y-4">
                         <p className="text-center text-lg font-medium">Transcribing audio...</p>
                         <div className="flex justify-center">

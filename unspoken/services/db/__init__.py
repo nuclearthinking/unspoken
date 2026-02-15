@@ -6,6 +6,7 @@ from .base import (
     TempFile,
     create_new_task,
     create_speaker,
+    delete_task,
     get_message,
     get_speaker,
     get_task,

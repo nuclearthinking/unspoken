@@ -14,6 +14,7 @@ class TaskResponse(BaseModel):
     file_name: str = None
     speakers: list[str] = None
     messages: list[TranscriptionSegment] = None
+    is_owned: bool = False
 
 
 class TaskResponseV2(BaseModel):
@@ -24,3 +25,4 @@ class TaskResponseV2(BaseModel):
     speakers: list[SpeakerResponse] = Field(default_factory=list)
     created_at: datetime.datetime
     updated_at: datetime.datetime
+    is_owned: bool = False

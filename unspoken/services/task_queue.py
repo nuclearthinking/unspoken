@@ -1,8 +1,8 @@
+import logging
 import queue
 import threading
+import time
 from typing import Callable
-
-import logging
 
 logger = logging.getLogger('uvicorn')
 
@@ -10,12 +10,17 @@ task_queue = queue.Queue()
 
 
 def worker(process_func: Callable):
+    logger.info('Background worker is running and waiting for tasks.')
     while True:
         task = task_queue.get()
         if task is None:
+            logger.info('Background worker received shutdown signal.')
             break
+        started_at = time.perf_counter()
+        logger.info('Background worker picked up task payload: %s', task)
         try:
             process_func(*task)
+            logger.info('Background worker finished task in %.2fs.', time.perf_counter() - started_at)
         except Exception as e:
             logger.exception(f'Error processing task: {e}')
         finally:

@@ -1,11 +1,12 @@
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from unspoken.api import messages_router, speakers_router, tasks_router, tasks_router_v2, upload_router
 from unspoken.services.db.base import setup as db_setup
@@ -24,14 +25,24 @@ worker_thread = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    startup_started_at = time.perf_counter()
+    logger.info('Application startup started.')
+    logger.info('Startup step 1/3: initializing database.')
     _init_db()
+    logger.info('Startup step 2/3: initializing temp files directory.')
     _init_temp_file_dir()
     global worker_thread
+    logger.info('Startup step 3/3: starting background worker thread.')
     worker_thread = start_worker(transcribe_audio_flow)
+    logger.info('Background worker started: %s', worker_thread.name if worker_thread else '<none>')
+    logger.info('Application startup finished in %.2fs.', time.perf_counter() - startup_started_at)
     yield
+    shutdown_started_at = time.perf_counter()
+    logger.info('Application shutdown started.')
     stop_worker()
     if worker_thread:
         worker_thread.join()
+    logger.info('Application shutdown finished in %.2fs.', time.perf_counter() - shutdown_started_at)
 
 
 app = FastAPI(debug=True, title='Unspoken', lifespan=lifespan)
@@ -51,14 +62,16 @@ app.include_router(tasks_router_v2, prefix='/api')
 app.include_router(messages_router, prefix='/api')
 app.include_router(speakers_router, prefix='/api')
 
-app.mount("/assets", StaticFiles(directory=Path(settings.frontend_build_path) / "assets"), name="static")
+app.mount('/assets', StaticFiles(directory=Path(settings.frontend_build_path) / 'assets'), name='static')
 
-@app.get("/{full_path:path}")
+
+@app.get('/{full_path:path}')
 async def serve_spa(request: Request, full_path: str):
-    if full_path.startswith("api/"):
+    if full_path.startswith('api/'):
         return await request.app.router(request.scope, request.receive, request.send)
     else:
-        return FileResponse(Path(settings.frontend_build_path) / "index.html")
+        return FileResponse(Path(settings.frontend_build_path) / 'index.html')
+
 
 def _init_temp_file_dir():
     logger.info('Initializing temp files directory')

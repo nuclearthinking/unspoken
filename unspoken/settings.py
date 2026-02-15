@@ -34,4 +34,5 @@ class _Settings(BaseSettings):
 
     frontend_build_path: str = 'frontend/dist'
 
+
 settings = _Settings()

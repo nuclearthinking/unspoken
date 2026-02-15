@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 class Transcriber(metaclass=SingletonMeta):
     def __init__(self):
+        init_started_at = time.perf_counter()
+        logger.info('Whisper initialization started from %s.', Model.large_v3.path())
         self._model = WhisperModel(
             model_size_or_path=Model.large_v3.path(),
             device=settings.device,
@@ -22,6 +24,8 @@ class Transcriber(metaclass=SingletonMeta):
             compute_type=settings.compute_type,
             download_root=settings.models_dir_path,
         )
+        init_elapsed = time.perf_counter() - init_started_at
+        logger.info('Whisper initialization finished in %.2fs.', init_elapsed)
 
     @torch.inference_mode()
     def transcribe(self, audio: bytes) -> SpeachToTextResult:
@@ -43,7 +47,7 @@ class Transcriber(metaclass=SingletonMeta):
                 )
             )
         end_time = time.time()
-        diarization_time = end_time - start_time
-        logger.info(f'Transcription completed in {diarization_time:.3f} seconds.')
+        transcription_time = end_time - start_time
+        logger.info('Transcription completed in %.3f seconds.', transcription_time)
         torch.cuda.empty_cache()
         return result

@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ClipboardCopyIcon, CheckIcon } from "lucide-react";
+import { ClipboardCopyIcon, CheckIcon, Trash2 } from "lucide-react";
 import clipboardCopy from 'clipboard-copy';
 import GithubIcon from '@/assets/github.svg';
 import LogoSvg from './logo_svg';
+import {
+    AlertDialog,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 
 const Logo = () => {
     return (
@@ -66,14 +72,89 @@ const CopyTranscriptButton = ({ onCopyTranscript, disabled }: {
     );
 };
 
+const DeleteTaskButton = ({ onDeleteTask, disabled }: {
+    onDeleteTask: () => Promise<void>,
+    disabled: boolean,
+}) => {
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(false);
+
+    const handleConfirmDelete = async () => {
+        setDeleting(true);
+        setDeleteError(false);
+        try {
+            await onDeleteTask();
+            setDialogOpen(false);
+        } catch (err) {
+            console.error('Failed to delete task', err);
+            setDeleteError(true);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    return (
+        <>
+            <Button
+                onClick={() => setDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                disabled={disabled}
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+            </Button>
+            <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <AlertDialogTitle>Delete Task</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action is irreversible. The task and all associated data (transcript,
+                    speakers, messages) will be permanently deleted.
+                </AlertDialogDescription>
+                {deleteError && (
+                    <p className="text-sm text-red-500 mt-2">Failed to delete task. Please try again.</p>
+                )}
+                <AlertDialogFooter>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialogOpen(false)}
+                        disabled={deleting}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleConfirmDelete}
+                        disabled={deleting}
+                    >
+                        {deleting ? 'Deleting...' : 'Delete'}
+                    </Button>
+                </AlertDialogFooter>
+            </AlertDialog>
+        </>
+    );
+};
+
 interface HeaderProps {
     showCopyTranscript: boolean;
     onCopyTranscript: () => string;
+    showDelete?: boolean;
+    onDeleteTask?: () => Promise<void>;
     isLoading: boolean;
     error: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ showCopyTranscript, onCopyTranscript, isLoading, error }) => {
+export const Header: React.FC<HeaderProps> = ({
+    showCopyTranscript,
+    onCopyTranscript,
+    showDelete = false,
+    onDeleteTask,
+    isLoading,
+    error,
+}) => {
     return (
         <header className="sticky top-0 z-10 w-full border-b bg-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 min-w-[640px]">
@@ -81,14 +162,20 @@ export const Header: React.FC<HeaderProps> = ({ showCopyTranscript, onCopyTransc
                     <div className="flex-1 flex justify-center sm:justify-start">
                         <Logo />
                     </div>
-                    {showCopyTranscript && (
-                        <div className="flex-1 flex justify-center sm:justify-end">
+                    <div className="flex-1 flex justify-center sm:justify-end gap-2">
+                        {showCopyTranscript && (
                             <CopyTranscriptButton
                                 onCopyTranscript={onCopyTranscript}
                                 disabled={isLoading || error}
                             />
-                        </div>
-                    )}
+                        )}
+                        {showDelete && onDeleteTask && (
+                            <DeleteTaskButton
+                                onDeleteTask={onDeleteTask}
+                                disabled={isLoading}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

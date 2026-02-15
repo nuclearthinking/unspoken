@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException
 
+from unspoken.core.security import hash_token
 from unspoken.enitites.api.messages import MessageResponse
 from unspoken.enitites.api.speakers import SpeakerResponse
 from unspoken.enitites.api.tasks import TaskResponseV2
@@ -13,10 +14,12 @@ tasks_router = APIRouter(
 
 
 @tasks_router.get('/{task_id:int}/')
-def get_task_messages(task_id: int) -> TaskResponseV2:
+def get_task_messages(task_id: int, x_task_token: str | None = Header(default=None)) -> TaskResponseV2:
     task = db.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail='Task not found.')
+
+    is_owned = bool(x_task_token and task.owner_token_hash and hash_token(x_task_token) == task.owner_token_hash)
 
     response = TaskResponseV2(
         id=task_id,
@@ -24,6 +27,7 @@ def get_task_messages(task_id: int) -> TaskResponseV2:
         file_name=task.uploaded_file_name,
         created_at=task.created_at,
         updated_at=task.updated_at,
+        is_owned=is_owned,
     )
     if task.status != TaskStatus.completed:
         return response

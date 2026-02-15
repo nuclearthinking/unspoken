@@ -1,3 +1,5 @@
 .env
 resources/models/*
 *.tsbuildinfo
+.venv
+.idea

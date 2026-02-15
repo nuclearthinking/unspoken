@@ -21,4 +21,5 @@ export interface TaskResponse {
     status: TaskStatus;
     speakers: string[];
     messages: Message[];
+    is_owned: boolean;
 }

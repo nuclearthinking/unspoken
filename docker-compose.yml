@@ -3,29 +3,27 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
       args:
-        - PORT=${PORT:-8soxk0}
+        - PORT=${PORT:-80}
         - CACHE_BUST=${CACHE_BUST:-1}
-    command: /bin/sh -c "uv run gunicorn unspoken.app:app -w 1 -b ${HOST}:${PORT} -k uvicorn.workers.UvicornWorker"
+    command: /bin/sh -c "uv run --python 3.12 --managed-python --no-sync --no-dev --locked gunicorn unspoken.app:app -w 1 -b ${HOST:-0.0.0.0}:${PORT:-80} -k uvicorn.workers.UvicornWorker"
     restart: always
     ports:
-      - "80:80"
+      - "${PORT:-80}:${PORT:-80}"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
+      device: "cuda"
+      compute_type: "float16"
       db_user: "unspoken"
       db_password: "changeme"
       db_host: db
       rabbitmq_user: "unspoken"
       rabbitmq_password: "unspoken"
       rabbitmq_host: amqp
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    gpus: all
     volumes:
       - tmp_files_volume:/app/temp_files
       - models_volume:/app/resources/models

@@ -1,30 +1,35 @@
+import functools
 import logging
+import time
 
 import torch
 
 from unspoken import exceptions
+from unspoken.core.loader import prepare_models
 from unspoken.enitites.diarization import DiarizationResult
 from unspoken.enitites.enums.task_status import TaskStatus
 from unspoken.enitites.speach_to_text import SpeachToTextResult
 from unspoken.enitites.transcription import TranscriptionResult
 from unspoken.services import db
-from unspoken.services.annotation.annotate_transcription import annotate, annotate_dtw
+from unspoken.services.annotation.annotate_transcription import annotate_dtw
 from unspoken.services.audio.converter import convert_to_wav
 from unspoken.services.ml.pyanote_diarizer import PyanoteDiarizer
 from unspoken.services.ml.transcriber import Transcriber
-from unspoken.core.loader import prepare_models
 
 logger = logging.getLogger('uvicorn')
 
 
 def clear_cuda_cache(func):
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
         result = func(*args, **kwargs)
 
-        torch.cuda.synchronize()
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
 
         return result
 
@@ -53,7 +58,6 @@ def annotate_transcription(
     diarization_result: DiarizationResult,
 ) -> TranscriptionResult:
     return annotate_dtw(stt_result, diarization_result)
-    return annotate(stt_result, diarization_result)
 
 
 def _save_to_database(
@@ -62,7 +66,8 @@ def _save_to_database(
     diarization_result: DiarizationResult,
     transcription_result: SpeachToTextResult,
 ) -> None:
-    with db.Session() as session:
+    session = db.Session()
+    try:
         task = db.get_task(task_id, session)
         if not task:
             raise exceptions.TaskNotFoundError(f'Task with id: {task_id} was not found.')
@@ -108,14 +113,22 @@ def _save_to_database(
                 )
             )
         db.save_messages(messages_to_save, session=session)
-    logger.info('Saved %s messages.', len(messages_to_save))
+
+        session.commit()
+        logger.info('Saved %s messages.', len(messages_to_save))
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def transcribe_audio_flow(temp_file_id: int, task_id: int):
-
-    logger.info('Initializing models.')
+    warmup_started_at = time.perf_counter()
+    logger.info('Task %s: model bootstrap started. First run may download weights.', task_id)
     prepare_models()
-    logger.info('Models initialized.')
+    warmup_elapsed = time.perf_counter() - warmup_started_at
+    logger.info('Task %s: model bootstrap finished in %.2fs.', task_id, warmup_elapsed)
 
     logger.info('Starting transcription flow for task %s.', task_id)
     temp_file = db.get_temp_file(temp_file_id)
@@ -148,7 +161,13 @@ def transcribe_audio_flow(temp_file_id: int, task_id: int):
         logger.info('Transcription flow completed for task %s.', task_id)
     except Exception:
         logger.exception('Exception occurred during running transcription flow.')
-        db.update_task(task, status=TaskStatus.failed)
+        try:
+            db.update_task(task, status=TaskStatus.failed)
+        except Exception:
+            logger.exception('Failed to update task %s status to failed.', task_id)
         raise
     finally:
-        temp_file.delete()
+        try:
+            temp_file.delete()
+        except Exception:
+            logger.exception('Failed to clean up temp file %s for task %s.', temp_file_id, task_id)
