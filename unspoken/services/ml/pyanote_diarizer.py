@@ -11,7 +11,6 @@ from unspoken.core.device import get_device
 from unspoken.enitites.diarization import DiarizationResult, SpeakerSegment
 from unspoken.enitites.enums.ml_models import Model
 from unspoken.services.ml.base_diarizer import BaseDiarizer
-from unspoken.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +20,12 @@ def _build_pipeline(model_path: str) -> SpeakerDiarization:
     path_embedding_model = str(Path(model_path) / 'embedding_checkpoint.bin')
 
     pipeline = SpeakerDiarization(
-        legacy=True,
         segmentation=path_segmentation_model,
         embedding=path_embedding_model,
         embedding_exclude_overlap=True,
         clustering='AgglomerativeClustering',
         segmentation_batch_size=32,
         embedding_batch_size=32,
-        token=settings.hf_token,
     )
 
     pipeline.instantiate(
