@@ -16,7 +16,7 @@ services:
         required: false
     environment:
       device: "cuda"
-      compute_type: "float32"
+      compute_type: "int8"
       db_user: "unspoken"
       db_password: "changeme"
       db_host: db
