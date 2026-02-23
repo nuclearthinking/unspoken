@@ -53,7 +53,7 @@ def delete_task(task_id: int, x_task_token: str | None = Header(default=None)):
     return Response(status_code=204)
 
 
-_SQUEEZE_MAX_PAUSE_SECONDS = 1.5
+_SQUEEZE_MAX_PAUSE_SECONDS = 3.0
 _SQUEEZE_MAX_DURATION_SECONDS = 20.0
 
 
